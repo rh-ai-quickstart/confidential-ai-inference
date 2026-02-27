@@ -70,6 +70,8 @@ Confidential containers secure workloads with a seamless attestation and key rel
 
 ## Deploy
 
+This AI Quickstart will deploy a `Llama-4-Scout-17B-16E-Instruct-quantized` model with vLLM, but secured using confidential containers powered by Intel® TDX.
+
 ### Clone the repository
 
 ```bash
@@ -95,9 +97,8 @@ oc adm policy add-scc-to-user privileged -z ${SA} -n ${PROJECT}
 
 ```bash
 export DEVICE="gpu" # options: [gpu]
-helm install ${PROJECT} helm/ --namespace ${PROJECT} \
-  --set device=${DEVICE}
-  --set sa=${SA}
+export HF_TOKEN="your-huggingface-token" # get yours at https://huggingface.co/settings/tokens
+helm install ${PROJECT} helm/ --namespace ${PROJECT} --set device=${DEVICE} --set sa=${SA} --set hfToken=${HF_TOKEN}
 ```
 
 

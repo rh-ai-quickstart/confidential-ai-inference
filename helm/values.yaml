@@ -5,3 +5,31 @@
 # User-customizable configuration
 device: "gpu"  # Options: ["gpu", "cpu"]
 sa: "vllm-sa"
+
+# Device-specific configuration
+deploymentConfigs:
+  gpu:
+    resourceName: "nvidia.com/GH100_H100_PCIE"  # Kubernetes GPU resource name
+    runtimeClassName: "kata-nvidia-gpu-cc"       # RuntimeClass for confidential GPU containers
+    memory: "263840"                             # Hypervisor memory in MiB
+    vcpus: "12"                                  # Hypervisor vCPU count
+    count: 1                                     # Number of GPUs to request
+  cpu:
+    resourceName: ""                             # No accelerator resource needed for CPU
+    runtimeClassName: "kata-cc"                  # RuntimeClass for confidential CPU containers
+    memory: "16384"                              # Hypervisor memory in MiB
+    vcpus: "8"                                   # Hypervisor vCPU count
+    count: 0                                     # No accelerator devices
+
+# Model configuration
+model:
+  repo: "RedHatAI/Llama-4-Scout-17B-16E-Instruct-quantized.w4a16"  # HuggingFace repo to download
+  localDir: "Llama-4-Scout-17B-16E-Instruct-quantized"             # Local directory name under /models-cache
+  servedName: "llama-4-scout-17b"                                   # Name exposed by vLLM API
+  maxModelLen: 32000
+  tensorParallelSize: 1
+  gpuMemoryUtilization: "0.98"
+  toolCallParser: "llama4_pythonic"
+
+# Secret configuration
+hfToken: ""

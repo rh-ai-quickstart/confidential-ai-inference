@@ -18,8 +18,8 @@ spec:
         component: vllm
       annotations:
         cdi.k8s.io/gpu: nvidia.com/gpu=0
-        io.katacontainers.config.hypervisor.default_memory: '263840'
-        io.katacontainers.config.hypervisor.default_vcpus: '12'
+        io.katacontainers.config.hypervisor.default_memory: '{{ (index .Values.deploymentConfigs .Values.device).memory }}'
+        io.katacontainers.config.hypervisor.default_vcpus: '{{ (index .Values.deploymentConfigs .Values.device).vcpus }}'
         io.katacontainers.config.hypervisor.kernel_params: agent.log=debug log_buf_len=1M systemd.log_level=debug debug systemd.log_target=console systemd.journald.forward_to_console=1 console=ttyS0 debug initrd=initrd
         io.katacontainers.config.runtime.create_container_timeout: '900'
     spec:
@@ -28,7 +28,7 @@ spec:
       schedulerName: default-scheduler
       affinity: {}
       terminationGracePeriodSeconds: 120
-      runtimeClassName: kata-nvidia-gpu-cc
+      runtimeClassName: {{ (index .Values.deploymentConfigs .Values.device).runtimeClassName }}
       securityContext:
         runAsUser: 0
       initContainers:
@@ -39,7 +39,7 @@ spec:
             - /bin/bash
             - -c
             - |
-              mkdir -p /models-cache/hf && mkdir -p /models-cache/.cache && export HF_HOME=/models-cache/hf && export HF_HUB_OFFLINE=0 && huggingface-cli download --cache-dir /models-cache/.cache --local-dir-use-symlinks False --revision main --local-dir /models-cache/Llama-4-Scout-17B-16E-Instruct-quantized RedHatAI/Llama-4-Scout-17B-16E-Instruct-quantized.w4a16
+              mkdir -p /models-cache/hf && mkdir -p /models-cache/.cache && export HF_HOME=/models-cache/hf && export HF_HUB_OFFLINE=0 && huggingface-cli download --cache-dir /models-cache/.cache --local-dir-use-symlinks False --revision main --local-dir /models-cache/{{ .Values.model.localDir }} {{ .Values.model.repo }}
           securityContext:
             privileged: true
             runAsUser: 0
@@ -54,13 +54,16 @@ spec:
             - /bin/bash
             - -c
             - |
-              echo '/usr/lib64' >> /etc/ld.so.conf.d/nvidia.conf && ldconfig && python3 -m vllm.entrypoints.openai.api_server --port=8080 --model=/models-cache/Llama-4-Scout-17B-16E-Instruct-quantized --served-model-name=llama-4-scout-17b --enforce-eager --tensor-parallel-size=1 --enable-auto-tool-choice --tool-call-parser=llama4_pythonic --enable_prefix_caching --gpu-memory-utilization=0.98 --trust-remote-code --max-model-len=32000 --enable-chunked-prefill
+              echo '/usr/lib64' >> /etc/ld.so.conf.d/nvidia.conf && ldconfig && python3 -m vllm.entrypoints.openai.api_server --port=8080 --model=/models-cache/{{ .Values.model.localDir }} --served-model-name={{ .Values.model.servedName }} --enforce-eager --tensor-parallel-size={{ .Values.model.tensorParallelSize }} --enable-auto-tool-choice --tool-call-parser={{ .Values.model.toolCallParser }} --enable_prefix_caching --gpu-memory-utilization={{ .Values.model.gpuMemoryUtilization }} --trust-remote-code --max-model-len={{ .Values.model.maxModelLen }} --enable-chunked-prefill
           resources:
             limits:
-              nvidia.com/GH100_H100_PCIE: '1'
+              {{ (index .Values.deploymentConfigs .Values.device).resourceName }}: '{{ (index .Values.deploymentConfigs .Values.device).count }}'
           env:
             - name: HUGGING_FACE_HUB_TOKEN
-              value: ""
+              valueFrom:
+                secretKeyRef:
+                  name: huggingface-secret
+                  key: token
           securityContext:
             privileged: true
             runAsUser: 0
@@ -112,7 +115,7 @@ spec:
             sizeLimit: 30Gi
       dnsPolicy: ClusterFirst
       tolerations:
-        - key: nvidia.com/GH100_H100_PCIE
+        - key: {{ (index .Values.deploymentConfigs .Values.device).resourceName }}
           effect: NoSchedule
   strategy:
     type: Recreate
