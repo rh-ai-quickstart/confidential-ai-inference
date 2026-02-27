@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: vllm-gpu
+  name: vllm-{{ .Values.device }}
   labels:
     app: vllm
     component: vllm
@@ -17,7 +17,9 @@ spec:
         app: vllm
         component: vllm
       annotations:
+        {{- if eq .Values.device "gpu" }}
         cdi.k8s.io/gpu: nvidia.com/gpu=0
+        {{- end }}
         io.katacontainers.config.hypervisor.default_memory: '{{ (index .Values.deploymentConfigs .Values.device).memory }}'
         io.katacontainers.config.hypervisor.default_vcpus: '{{ (index .Values.deploymentConfigs .Values.device).vcpus }}'
         io.katacontainers.config.hypervisor.kernel_params: agent.log=debug log_buf_len=1M systemd.log_level=debug debug systemd.log_target=console systemd.journald.forward_to_console=1 console=ttyS0 debug initrd=initrd
@@ -39,7 +41,16 @@ spec:
             - /bin/bash
             - -c
             - |
-              mkdir -p /models-cache/hf && mkdir -p /models-cache/.cache && export HF_HOME=/models-cache/hf && export HF_HUB_OFFLINE=0 && huggingface-cli download --cache-dir /models-cache/.cache --local-dir-use-symlinks False --revision main --local-dir /models-cache/{{ .Values.model.localDir }} {{ .Values.model.repo }}
+              mkdir -p /models-cache/hf && \
+              mkdir -p /models-cache/.cache && \
+              export HF_HOME=/models-cache/hf && \
+              export HF_HUB_OFFLINE=0 && \
+              huggingface-cli download \
+                --cache-dir /models-cache/.cache \
+                --local-dir-use-symlinks False \
+                --revision main \
+                --local-dir /models-cache/{{ .Values.model.localDir }} \
+                {{ .Values.model.repo }}
           securityContext:
             privileged: true
             runAsUser: 0
@@ -54,7 +65,22 @@ spec:
             - /bin/bash
             - -c
             - |
-              echo '/usr/lib64' >> /etc/ld.so.conf.d/nvidia.conf && ldconfig && python3 -m vllm.entrypoints.openai.api_server --port=8080 --model=/models-cache/{{ .Values.model.localDir }} --served-model-name={{ .Values.model.servedName }} --enforce-eager --tensor-parallel-size={{ .Values.model.tensorParallelSize }} --enable-auto-tool-choice --tool-call-parser={{ .Values.model.toolCallParser }} --enable_prefix_caching --gpu-memory-utilization={{ .Values.model.gpuMemoryUtilization }} --trust-remote-code --max-model-len={{ .Values.model.maxModelLen }} --enable-chunked-prefill
+              {{- if eq .Values.device "gpu" }}
+              echo '/usr/lib64' >> /etc/ld.so.conf.d/nvidia.conf && ldconfig && \
+              {{- end }}
+              python3 -m vllm.entrypoints.openai.api_server \
+                --port=8080 \
+                --model=/models-cache/{{ .Values.model.localDir }} \
+                --served-model-name={{ .Values.model.servedName }} \
+                --enforce-eager \
+                --tensor-parallel-size={{ .Values.model.tensorParallelSize }} \
+                --enable-auto-tool-choice \
+                --tool-call-parser={{ .Values.model.toolCallParser }} \
+                --enable_prefix_caching \
+                --gpu-memory-utilization={{ .Values.model.gpuMemoryUtilization }} \
+                --trust-remote-code \
+                --max-model-len={{ .Values.model.maxModelLen }} \
+                --enable-chunked-prefill
           resources:
             limits:
               {{ (index .Values.deploymentConfigs .Values.device).resourceName }}: '{{ (index .Values.deploymentConfigs .Values.device).count }}'
@@ -64,6 +90,10 @@ spec:
                 secretKeyRef:
                   name: huggingface-secret
                   key: token
+            {{- range $key, $val := (index .Values.devices .Values.device).env }}
+            - name: {{ $key }}
+              value: {{ $val | quote }}
+            {{- end }}
           securityContext:
             privileged: true
             runAsUser: 0

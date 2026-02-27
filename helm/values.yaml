@@ -9,23 +9,51 @@ sa: "vllm-sa"
 # Device-specific configuration
 deploymentConfigs:
   gpu:
-    resourceName: "nvidia.com/GH100_H100_PCIE"  # Kubernetes GPU resource name
-    runtimeClassName: "kata-nvidia-gpu-cc"       # RuntimeClass for confidential GPU containers
-    memory: "263840"                             # Hypervisor memory in MiB
-    vcpus: "12"                                  # Hypervisor vCPU count
-    count: 1                                     # Number of GPUs to request
+    katacontainers:
+      resourceName: "nvidia.com/GH100_H100_PCIE"
+      runtimeClassName: "kata-nvidia-gpu-cc"
+      memory: "263840"
+      vcpus: "12"
+      count: 1
+    env:
+      CUDA_VISIBLE_DEVICES: "0"
+    resources:
+      limits:
+        cpu: "16"
+        memory: "32Gi"
+        nvidia.com/gpu: "1"
+      requests:
+        cpu: "12"
+        memory: "24Gi"
+        nvidia.com/gpu: "1"
   cpu:
-    resourceName: ""                             # No accelerator resource needed for CPU
-    runtimeClassName: "kata-cc"                  # RuntimeClass for confidential CPU containers
-    memory: "16384"                              # Hypervisor memory in MiB
-    vcpus: "8"                                   # Hypervisor vCPU count
-    count: 0                                     # No accelerator devices
+    katacontainers:
+      resourceName: ""
+      runtimeClassName: "kata-cpu-cc"
+      memory: "32768"
+      vcpus: "32"
+      count: 0
+    env:
+      VLLM_CPU_KVCACHE_SPACE: "40"
+      VLLM_RPC_TIMEOUT: "100000"
+      VLLM_ALLOW_LONG_MAX_MODEL_LEN: "1"
+      VLLM_ENGINE_ITERATION_TIMEOUT_S: "120"
+      VLLM_CPU_SGL_KERNEL: "1"
+      HF_HUB_DISABLE_XET: "1"
+    resources:
+      limits:
+        cpu: "64"
+        memory: "64Gi"
+      requests:
+        cpu: "32"
+        memory: "32Gi"
+    
 
 # Model configuration
 model:
   repo: "RedHatAI/Llama-4-Scout-17B-16E-Instruct-quantized.w4a16"  # HuggingFace repo to download
   localDir: "Llama-4-Scout-17B-16E-Instruct-quantized"             # Local directory name under /models-cache
-  servedName: "llama-4-scout-17b"                                   # Name exposed by vLLM API
+  servedName: "llama-4-scout-17b"                                  # Name exposed by vLLM API
   maxModelLen: 32000
   tensorParallelSize: 1
   gpuMemoryUtilization: "0.98"
