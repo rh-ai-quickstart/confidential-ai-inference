@@ -1,70 +1,42 @@
 # Confidential Computing for AI Inference with Intel® TDX
 
-<!-- CONTRIBUTOR TODO: update title ^^
-
-*replace the H1 title above with your quickstart title*
-
-TITLE requirements:
-	* MAX CHAR: 64 
-	* Industry use case, ie: Protect patient data with LLM guardrails
-
-TITLE will be extracted for publication.
-
--- > 
-
-
-
-<!-- CONTRIBUTOR TODO: short description 
-
-*ADD a SHORT DESCRIPTION of your use case between H1 title and next section*
-
-SHORT DESCRIPTION requirements:
-	* MAX CHAR: 160
-	* Describe the INDUSTRY use case 
-
-SHORT DESCRIPTION will be extracted for publication.
-
---> 
 Deploy confidential containers with Intel® Trust Domain Extensions (Intel® TDX) to protect models and sensitive data from unauthorized access.
+
 
 ## Table of contents
 
-<!-- Table of contents is optional, but recommended. 
-
-REMEMBER: to remove this section if you don't use a TOC.
-
--->
+- [Detailed description](#detailed-description)
+  - [Architecture diagrams](#architecture-diagrams)
+- [Requirements](#requirements)
+  - [Minimum hardware requirements](#minimum-hardware-requirements)
+  - [Minimum software requirements](#minimum-software-requirements)
+  - [Required user permissions](#required-user-permissions)
+- [Deploy](#deploy)
+  - [Clone the repository](#clone-the-repository)
+  - [Create the project](#create-the-project)
+  - [Build and deploy the helm chart](#build-and-deploy-the-helm-chart)
+- [Test](#test)
+- [Delete](#delete)
+- [References](#references)
 
 ## Detailed description
 
-<!-- CONTRIBUTOR TODO: add detailed description.
+When a model is run on a server, its proprietary weights, sensitive data and all queries received by the users reside in unencrypted system memory. This grants any privileged software or user, such as a cluster administrator, the ability to inspect—and potentially steal—the model and its queries during runtime. Exposing data while in use represents a severe breach of privacy, security, and intellectual property.
 
-This section is required. Describe the quickstart use case in more detail. 
+Intel® Trust Domain Extensions, or TDX, is Intel's newest hardware-based confidential computing technology. This hardware-based Trusted Execution Environment (TEE) facilitates the deployment of trust domains (TDs), which are hardware-isolated VMs designed to enhance the protection of sensitive data and applications from unauthorized access. The memory and register state associated with the TEE are encrypted with a key specific to the TEE and accessible only to the hardware.
 
-This is not a technical description. This is about the workload. 
+Intel® TDX delivers greater confidence in data integrity, confidentiality and authenticity, which enables engineers and tech professionals to create and maintain more secure systems, establishing more trust in virtualized environments.
 
-Technical description comes later.
+Confidential containers secure workloads with a seamless attestation and key release flow. The Confidential Containers runtime starts a confidential VM - a Trust Domain. Inside this secure environment, the Trustee Agents take care of performing remote attestation, reaching out to the remote attester (Trustee) to verify that the environment is trustworthy and equipped with the right software and hardware features. If the attestation passes, the same agent requests the encryption keys from the Key Broker Service — a gatekeeper that ensures only verified environments get access. Every read and write to memory is encrypted, ensuring data is never exposed, even on an untrusted host.
 
--->
-
-
-### See it in action 
-
-<!-- 
-
-*This section is optional but recommended*
-
-Arcades are a great way to showcase your quickstart before installation.
-
--->
 
 ### Architecture diagrams
 
-<!-- CONTRIBUTOR TODO: add architecture diagram. 
+![Intel TDX](docs/images/intel_tdx.png)
+*Intel® TDX features trust domains to protect data and applications from unauthorized access.*
 
-*Section is required. Put images in `docs/images` folder* 
-
---> 
+![Confidential Containers](docs/images/confidential_containers.png)
+*Confidential Containers utilize attestation services to ensure the environment is trustworthy before granting access.*
 
 
 ## Requirements
@@ -72,96 +44,62 @@ Arcades are a great way to showcase your quickstart before installation.
 
 ### Minimum hardware requirements 
 
-<!-- CONTRIBUTOR TODO: add minimum hardware requirements
+- 8+ vCPUs, 4th Gen Intel® Xeon® Scalable Processors or newer
+- 24+ GiB RAM
 
-*Section is required.* 
-
-Be as specific as possible. DON'T say "GPU". Be specific.
-
-List minimum hardware requirements.
-
---> 
+**Optional, depending on selected hardware platform**
+- 1 GPU (NVIDIA H100, H200, B200, or equivalent)
 
 ### Minimum software requirements
 
-<!-- CONTRIBUTOR TODO: add minimum software requirements
-
-*Section is required.*
-
-Be specific. Don't say "OpenShift AI". Instead, tested with OpenShift AI 2.22
-
-If you know it only works in a specific version, say so. 
-
--->
+- Red Hat OpenShift
+- Red Hat OpenShift AI 2.16+
+- OpenShift CLI (`oc`) - [Download here](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html)
+- Helm CLI (`helm`) - [Download here](https://helm.sh/docs/intro/install/)
 
 ### Required user permissions
 
-<!-- CONTRIBUTOR TODO: add user permissions
-
-*Section is required. Describe the permissions the user will need. Cluster
-admin? Regular user?*
-
---> 
+- Standard user. No elevated cluster permissions required.
 
 
 ## Deploy
 
-<!-- CONTRIBUTOR TODO: add installation instructions 
+### Clone the repository
 
-*Section is required. Include the explicit steps needed to deploy your
-quickstart. 
+```bash
+git clone https://github.com/rh-ai-quickstart/confidential-computing
+cd confidential-computing
+```
 
-Assume user will follow your instructions EXACTLY. 
+### Create the project
 
-If screenshots are included, remember to put them in the
-`docs/images` folder.*
+```bash
+PROJECT="coco-demo"
+oc new-project ${PROJECT}
+```
 
--->
+### Build and deploy the helm chart
 
-### Delete
+```bash
+export DEVICE="gpu" # options: [gpu, cpu]
+helm install ${PROJECT} helm/ --namespace ${PROJECT} --set device=$DEVICE
+```
 
-<!-- CONTRIBUTOR TODO: add uninstall instructions
 
-*Section required. Include explicit steps to cleanup quickstart.*
 
-Some users may need to reclaim space by removing this quickstart. Make it easy.
+## Test
 
--->
+TODO: explain how to access the UI, give sample simple and complex queries of different types, show which hardware is selected, and include screenshots of sample outputs
+
+## Delete
+
+To uninstall and delete the project:
+
+```bash
+helm uninstall coco
+oc delete project coco-demo
+```
 
 ## References 
 
-<!-- 
-
-*Section optional.* Remember to remove if do not use.
-
-Include links to supporting information, documentation, or learning materials.
-
---> 
-
-## Technical details
-
-<!-- 
-
-*Section is optional.* 
-
-Here is your chance to share technical details. 
-
-Welcome to add sections as needed. Keep additions as structured and consistent as possible.
-
--->
-
-## Tags
-
-<!-- CONTRIBUTOR TODO: add metadata and tags for publication
-
-TAG requirements: 
-	* Title: max char: 64, describes quickstart (match H1 heading) 
-	* Description: max char: 160, match SHORT DESCRIPTION above
-	* Industry: target industry, ie. Healthcare OR Financial Services
-	* Product: list primary product, ie. OpenShift AI OR OpenShift OR RHEL 
-	* Use case: use case descriptor, ie. security, automation, 
-	* Contributor org: defaults to Red Hat unless partner or community
-	
-Additional MIST tags, populated by web team.
-
--->
+TODO: optional

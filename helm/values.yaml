@@ -1,0 +1,6 @@
+# Default values for confidential-computing.
+
+# Namespace will be automatically set by Helm to {{ .Release.Namespace }}
+
+# User-customizable configuration
+device: "gpu"  # Options: ["gpu", "cpu"]

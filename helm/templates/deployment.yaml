@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: vllm
+    component: vllm
+  name: vllm
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: vllm
+      component: vllm
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        io.katacontainers.config.runtime.create_container_timeout: "900"
+      creationTimestamp: null
+      labels:
+        app: vllm
+        component: vllm
+    spec:
+      runtimeClassName: kata-remote
+      affinity: {}
+      containers:
+      - args:
+        - --model
+        - TinyLlama/TinyLlama-1.1B-Chat-v1.0
+        - --download-dir
+        - /models-cache
+        - --max-model-len
+        - "2048"
+        env:
+        - name: HUGGING_FACE_HUB_TOKEN
+          value: ""
+        image: quay.io/rh-aiservices-bu/vllm-cpu-openai-ubi9:0.3
+        imagePullPolicy: IfNotPresent
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: http
+            scheme: HTTP
+          periodSeconds: 100
+          successThreshold: 1
+          timeoutSeconds: 8
+        name: server
+        ports:
+        - containerPort: 8000
+          name: http
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /health
+            port: http
+            scheme: HTTP
+          periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 5
+        resources: {}
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+          runAsNonRoot: true
+          seccompProfile:
+            type: RuntimeDefault
+        startupProbe:
+          failureThreshold: 24
+          httpGet:
+            path: /health
+            port: http
+            scheme: HTTP
+          periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 1
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /dev/shm
+          name: shm
+        - mountPath: /models-cache
+          name: models-cache
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 120
+      volumes:
+      - emptyDir:
+          medium: Memory
+          sizeLimit: 1Gi
+        name: shm
+      - emptyDir:
+          sizeLimit: 10Gi
+        name: models-cache
