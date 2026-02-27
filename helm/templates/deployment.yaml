@@ -20,8 +20,8 @@ spec:
         {{- if eq .Values.device "gpu" }}
         cdi.k8s.io/gpu: nvidia.com/gpu=0
         {{- end }}
-        io.katacontainers.config.hypervisor.default_memory: '{{ (index .Values.deploymentConfigs .Values.device).memory }}'
-        io.katacontainers.config.hypervisor.default_vcpus: '{{ (index .Values.deploymentConfigs .Values.device).vcpus }}'
+        io.katacontainers.config.hypervisor.default_memory: '{{ (index .Values.deploymentConfigs .Values.device).katacontainers.memory }}'
+        io.katacontainers.config.hypervisor.default_vcpus: '{{ (index .Values.deploymentConfigs .Values.device).katacontainers.vcpus }}'
         io.katacontainers.config.hypervisor.kernel_params: agent.log=debug log_buf_len=1M systemd.log_level=debug debug systemd.log_target=console systemd.journald.forward_to_console=1 console=ttyS0 debug initrd=initrd
         io.katacontainers.config.runtime.create_container_timeout: '900'
     spec:
@@ -30,7 +30,7 @@ spec:
       schedulerName: default-scheduler
       affinity: {}
       terminationGracePeriodSeconds: 120
-      runtimeClassName: {{ (index .Values.deploymentConfigs .Values.device).runtimeClassName }}
+      runtimeClassName: {{ (index .Values.deploymentConfigs .Values.device).katacontainers.runtimeClassName }}
       securityContext:
         runAsUser: 0
       initContainers:
@@ -72,25 +72,23 @@ spec:
                 --port=8080 \
                 --model=/models-cache/{{ .Values.model.localDir }} \
                 --served-model-name={{ .Values.model.servedName }} \
-                --enforce-eager \
-                --tensor-parallel-size={{ .Values.model.tensorParallelSize }} \
                 --enable-auto-tool-choice \
                 --tool-call-parser={{ .Values.model.toolCallParser }} \
-                --enable_prefix_caching \
-                --gpu-memory-utilization={{ .Values.model.gpuMemoryUtilization }} \
                 --trust-remote-code \
-                --max-model-len={{ .Values.model.maxModelLen }} \
-                --enable-chunked-prefill
+                {{- range $key, $val := (index .Values.deploymentConfigs .Values.device).model }}
+                --{{ $key }}={{ $val }} \
+                {{- end }}
+          {{- with (index .Values.deploymentConfigs .Values.device).resources }}
           resources:
-            limits:
-              {{ (index .Values.deploymentConfigs .Values.device).resourceName }}: '{{ (index .Values.deploymentConfigs .Values.device).count }}'
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           env:
             - name: HUGGING_FACE_HUB_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: huggingface-secret
                   key: token
-            {{- range $key, $val := (index .Values.devices .Values.device).env }}
+            {{- range $key, $val := (index .Values.deploymentConfigs .Values.device).env }}
             - name: {{ $key }}
               value: {{ $val | quote }}
             {{- end }}
@@ -144,9 +142,11 @@ spec:
           emptyDir:
             sizeLimit: 30Gi
       dnsPolicy: ClusterFirst
+      {{- with (index .Values.deploymentConfigs .Values.device).katacontainers.resourceName }}
       tolerations:
-        - key: {{ (index .Values.deploymentConfigs .Values.device).resourceName }}
+        - key: {{ . }}
           effect: NoSchedule
+      {{- end }}
   strategy:
     type: Recreate
   revisionHistoryLimit: 10
