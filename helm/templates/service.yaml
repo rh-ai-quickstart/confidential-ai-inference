@@ -1,22 +1,24 @@
-apiVersion: v1
 kind: Service
+apiVersion: v1
 metadata:
-  labels:
-    app: vllm
-    component: vllm
-  name: vllm
+ name: vllm
+ labels:
+   app: vllm
+   component: vllm
 spec:
-  clusterIP: None
-  ipFamilies:
-  - IPv4
-  ipFamilyPolicy: SingleStack
-  ports:
-  - name: http
-    port: 8000
-    protocol: TCP
-    targetPort: http
-  selector:
-    app: vllm
-    component: vllm
-  sessionAffinity: None
-  type: ClusterIP
+ externalTrafficPolicy: Cluster
+ ipFamilies:
+   - IPv4
+ ports:
+   - name: http
+     protocol: TCP
+     port: 8080
+     targetPort: 8080
+     nodePort: 31080
+ internalTrafficPolicy: Cluster
+ type: NodePort
+ ipFamilyPolicy: SingleStack
+ sessionAffinity: None
+ selector:
+   app: vllm
+   component: vllm

@@ -4,3 +4,4 @@
 
 # User-customizable configuration
 device: "gpu"  # Options: ["gpu", "cpu"]
+sa: "vllm-sa"

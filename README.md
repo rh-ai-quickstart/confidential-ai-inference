@@ -57,6 +57,12 @@ Confidential containers secure workloads with a seamless attestation and key rel
 - OpenShift CLI (`oc`) - [Download here](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html)
 - Helm CLI (`helm`) - [Download here](https://helm.sh/docs/intro/install/)
 
+**Required if running with GPU**
+
+- Node Feature Discovery Operator 4.21.0+
+- Kernel Module Management 2.5.1+
+- NVIDIA GPU Operator 25.10.1+
+
 ### Required user permissions
 
 - Standard user. No elevated cluster permissions required.
@@ -67,22 +73,31 @@ Confidential containers secure workloads with a seamless attestation and key rel
 ### Clone the repository
 
 ```bash
-git clone https://github.com/rh-ai-quickstart/confidential-computing
-cd confidential-computing
+git clone https://github.com/rh-ai-quickstart/confidential-ai-inference
+cd confidential-ai-inference
 ```
 
 ### Create the project
 
 ```bash
-PROJECT="coco-demo"
+PROJECT="cofidential-ai-demo"
 oc new-project ${PROJECT}
+```
+
+### Create the security permissions (Required for GPU only)
+```bash
+export SA="vllm-sa"
+oc create sa ${SA} -n ${PROJECT}
+oc adm policy add-scc-to-user privileged -z ${SA} -n ${PROJECT}
 ```
 
 ### Build and deploy the helm chart
 
 ```bash
-export DEVICE="gpu" # options: [gpu, cpu]
-helm install ${PROJECT} helm/ --namespace ${PROJECT} --set device=$DEVICE
+export DEVICE="gpu" # options: [gpu]
+helm install ${PROJECT} helm/ --namespace ${PROJECT} \
+  --set device=${DEVICE}
+  --set sa=${SA}
 ```
 
 
@@ -96,8 +111,8 @@ TODO: explain how to access the UI, give sample simple and complex queries of di
 To uninstall and delete the project:
 
 ```bash
-helm uninstall coco
-oc delete project coco-demo
+helm uninstall cofidential-ai
+oc delete project cofidential-ai-demo
 ```
 
 ## References 
