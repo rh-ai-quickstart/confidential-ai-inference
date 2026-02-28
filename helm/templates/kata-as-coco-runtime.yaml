@@ -1,0 +1,433 @@
+---
+# Source: confidential-containers/charts/kata-as-coco-runtime/templates/kata-rbac.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kata-as-coco-runtime-sa
+---
+# Source: confidential-containers/charts/kata-as-coco-runtime/templates/kata-rbac.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: kata-as-coco-runtime-role
+rules:
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["get", "patch"]
+- apiGroups: ["node.k8s.io"]
+  resources: ["runtimeclasses"]
+  verbs: ["get", "list", "patch"]
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["get", "list"]
+- apiGroups: ["nfd.k8s-sigs.io"]
+  resources: ["nodefeaturerules"]
+  verbs: ["create", "delete", "get", "list", "patch", "update", "watch"]
+- apiGroups: ["apps"]
+  resources: ["daemonsets"]
+  verbs: ["get", "list", "watch"]
+---
+# Source: confidential-containers/charts/kata-as-coco-runtime/templates/kata-rbac.yaml
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: kata-as-coco-runtime-rb
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kata-as-coco-runtime-role
+subjects:
+- kind: ServiceAccount
+  name: kata-as-coco-runtime-sa
+---
+# Source: confidential-containers/charts/kata-as-coco-runtime/templates/kata-deploy.yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: kata-as-coco-runtime
+spec:
+  selector:
+    matchLabels:
+      name: kata-as-coco-runtime
+  template:
+    metadata:
+      labels:
+        name: kata-as-coco-runtime
+    spec:
+      serviceAccountName: kata-as-coco-runtime-sa
+      hostPID: true
+      containers:
+      - name: kube-kata
+        image: quay.io/kata-containers/kata-deploy:3.25.0
+        imagePullPolicy: Always
+        command: ["/opt/kata-artifacts/scripts/kata-deploy.sh", "install"]
+        env:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: DEBUG
+          value: "false"
+        - name: SHIMS_X86_64
+          value: "qemu-coco-dev qemu-coco-dev-runtime-rs qemu-nvidia-gpu qemu-nvidia-gpu-snp qemu-nvidia-gpu-tdx qemu-snp qemu-tdx"
+        - name: SHIMS_AARCH64
+          value: "qemu-cca qemu-nvidia-gpu"
+        - name: SHIMS_S390X
+          value: "qemu-coco-dev qemu-coco-dev-runtime-rs qemu-se qemu-se-runtime-rs"
+        - name: DEFAULT_SHIM_X86_64
+          value: "qemu-tdx"
+        - name: DEFAULT_SHIM_AARCH64
+          value: "qemu"
+        - name: DEFAULT_SHIM_S390X
+          value: "qemu"
+        - name: DEFAULT_SHIM_PPC64LE
+          value: "qemu"
+        - name: SNAPSHOTTER_HANDLER_MAPPING_X86_64
+          value: "qemu-coco-dev:nydus,qemu-coco-dev-runtime-rs:nydus,qemu-snp:nydus,qemu-tdx:nydus"
+        - name: SNAPSHOTTER_HANDLER_MAPPING_AARCH64
+          value: "qemu-cca:nydus"
+        - name: SNAPSHOTTER_HANDLER_MAPPING_S390X
+          value: "qemu-coco-dev:nydus,qemu-coco-dev-runtime-rs:nydus,qemu-se:nydus,qemu-se-runtime-rs:nydus"
+        - name: PULL_TYPE_MAPPING_X86_64
+          value: "qemu-coco-dev:guest-pull,qemu-coco-dev-runtime-rs:guest-pull,qemu-nvidia-gpu-snp:guest-pull,qemu-nvidia-gpu-tdx:guest-pull,qemu-snp:guest-pull,qemu-tdx:guest-pull"
+        - name: PULL_TYPE_MAPPING_AARCH64
+          value: "qemu-cca:guest-pull"
+        - name: PULL_TYPE_MAPPING_S390X
+          value: "qemu-coco-dev:guest-pull,qemu-coco-dev-runtime-rs:guest-pull,qemu-se:guest-pull,qemu-se-runtime-rs:guest-pull"
+        - name: INSTALLATION_PREFIX
+          value: ""
+        - name: MULTI_INSTALL_SUFFIX
+          value: ""
+        - name: EXPERIMENTAL_SETUP_SNAPSHOTTER
+          value: "nydus"
+        - name: EXPERIMENTAL_FORCE_GUEST_PULL_X86_64
+          value: "qemu-nvidia-gpu-snp,qemu-nvidia-gpu-tdx"
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: crio-conf
+          mountPath: /etc/crio/
+        - name: containerd-conf
+          mountPath: /etc/containerd/
+        - name: host
+          mountPath: /host/
+      volumes:
+      - name: crio-conf
+        hostPath:
+          path: /etc/crio/
+      - name: containerd-conf
+        hostPath:
+          path: '/etc/containerd/'
+      - name: host
+        hostPath:
+          path: /
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 1
+    type: RollingUpdate
+---
+# Source: confidential-containers/charts/kata-as-coco-runtime/templates/runtimeclasses.yaml
+kind: RuntimeClass
+apiVersion: node.k8s.io/v1
+metadata:
+  name: kata-qemu-cca
+  labels:
+    app.kubernetes.io/managed-by: kata-deploy
+    kata-deploy/instance: "default"
+handler: kata-qemu-cca
+overhead:
+  podFixed:
+    memory: "2048Mi"
+    cpu: "1.0"
+scheduling:
+  nodeSelector:
+    katacontainers.io/kata-runtime: "true"
+---
+# Source: confidential-containers/charts/kata-as-coco-runtime/templates/runtimeclasses.yaml
+kind: RuntimeClass
+apiVersion: node.k8s.io/v1
+metadata:
+  name: kata-qemu-coco-dev
+  labels:
+    app.kubernetes.io/managed-by: kata-deploy
+    kata-deploy/instance: "default"
+handler: kata-qemu-coco-dev
+overhead:
+  podFixed:
+    memory: "160Mi"
+    cpu: "250m"
+scheduling:
+  nodeSelector:
+    katacontainers.io/kata-runtime: "true"
+---
+# Source: confidential-containers/charts/kata-as-coco-runtime/templates/runtimeclasses.yaml
+kind: RuntimeClass
+apiVersion: node.k8s.io/v1
+metadata:
+  name: kata-qemu-coco-dev-runtime-rs
+  labels:
+    app.kubernetes.io/managed-by: kata-deploy
+    kata-deploy/instance: "default"
+handler: kata-qemu-coco-dev-runtime-rs
+overhead:
+  podFixed:
+    memory: "160Mi"
+    cpu: "250m"
+scheduling:
+  nodeSelector:
+    katacontainers.io/kata-runtime: "true"
+---
+# Source: confidential-containers/charts/kata-as-coco-runtime/templates/runtimeclasses.yaml
+kind: RuntimeClass
+apiVersion: node.k8s.io/v1
+metadata:
+  name: kata-qemu-nvidia-gpu
+  labels:
+    app.kubernetes.io/managed-by: kata-deploy
+    kata-deploy/instance: "default"
+handler: kata-qemu-nvidia-gpu
+overhead:
+  podFixed:
+    memory: "4096Mi"
+    cpu: "1.0"
+scheduling:
+  nodeSelector:
+    katacontainers.io/kata-runtime: "true"
+---
+# Source: confidential-containers/charts/kata-as-coco-runtime/templates/runtimeclasses.yaml
+kind: RuntimeClass
+apiVersion: node.k8s.io/v1
+metadata:
+  name: kata-qemu-nvidia-gpu-snp
+  labels:
+    app.kubernetes.io/managed-by: kata-deploy
+    kata-deploy/instance: "default"
+handler: kata-qemu-nvidia-gpu-snp
+overhead:
+  podFixed:
+    memory: "20480Mi"
+    cpu: "1.0"
+scheduling:
+  nodeSelector:
+    katacontainers.io/kata-runtime: "true"
+---
+# Source: confidential-containers/charts/kata-as-coco-runtime/templates/runtimeclasses.yaml
+kind: RuntimeClass
+apiVersion: node.k8s.io/v1
+metadata:
+  name: kata-qemu-nvidia-gpu-tdx
+  labels:
+    app.kubernetes.io/managed-by: kata-deploy
+    kata-deploy/instance: "default"
+handler: kata-qemu-nvidia-gpu-tdx
+overhead:
+  podFixed:
+    memory: "20480Mi"
+    cpu: "1.0"
+scheduling:
+  nodeSelector:
+    katacontainers.io/kata-runtime: "true"
+---
+# Source: confidential-containers/charts/kata-as-coco-runtime/templates/runtimeclasses.yaml
+kind: RuntimeClass
+apiVersion: node.k8s.io/v1
+metadata:
+  name: kata-qemu-se
+  labels:
+    app.kubernetes.io/managed-by: kata-deploy
+    kata-deploy/instance: "default"
+handler: kata-qemu-se
+overhead:
+  podFixed:
+    memory: "1024Mi"
+    cpu: "1.0"
+scheduling:
+  nodeSelector:
+    katacontainers.io/kata-runtime: "true"
+---
+# Source: confidential-containers/charts/kata-as-coco-runtime/templates/runtimeclasses.yaml
+kind: RuntimeClass
+apiVersion: node.k8s.io/v1
+metadata:
+  name: kata-qemu-se-runtime-rs
+  labels:
+    app.kubernetes.io/managed-by: kata-deploy
+    kata-deploy/instance: "default"
+handler: kata-qemu-se-runtime-rs
+overhead:
+  podFixed:
+    memory: "1024Mi"
+    cpu: "1.0"
+scheduling:
+  nodeSelector:
+    katacontainers.io/kata-runtime: "true"
+---
+# Source: confidential-containers/charts/kata-as-coco-runtime/templates/runtimeclasses.yaml
+kind: RuntimeClass
+apiVersion: node.k8s.io/v1
+metadata:
+  name: kata-qemu-snp
+  labels:
+    app.kubernetes.io/managed-by: kata-deploy
+    kata-deploy/instance: "default"
+handler: kata-qemu-snp
+overhead:
+  podFixed:
+    memory: "2048Mi"
+    cpu: "1.0"
+scheduling:
+  nodeSelector:
+    katacontainers.io/kata-runtime: "true"
+---
+# Source: confidential-containers/charts/kata-as-coco-runtime/templates/runtimeclasses.yaml
+kind: RuntimeClass
+apiVersion: node.k8s.io/v1
+metadata:
+  name: kata-qemu-tdx
+  labels:
+    app.kubernetes.io/managed-by: kata-deploy
+    kata-deploy/instance: "default"
+handler: kata-qemu-tdx
+overhead:
+  podFixed:
+    memory: "2048Mi"
+    cpu: "1.0"
+scheduling:
+  nodeSelector:
+    katacontainers.io/kata-runtime: "true"
+---
+# Source: confidential-containers/charts/kata-as-coco-runtime/templates/post-delete-job.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: kata-as-coco-runtime-sa-cleanup
+  annotations:
+    "helm.sh/hook": post-delete
+    "helm.sh/hook-weight": "-3"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+---
+# Source: confidential-containers/charts/kata-as-coco-runtime/templates/post-delete-job.yaml
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: kata-as-coco-runtime-role-cleanup
+  annotations:
+    "helm.sh/hook": post-delete
+    "helm.sh/hook-weight": "-2"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+rules:
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["get", "patch"]
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["get", "list"]
+- apiGroups: ["nfd.k8s-sigs.io"]
+  resources: ["nodefeaturerules"]
+  verbs: ["delete", "get", "list", "watch"]
+- apiGroups: ["apps"]
+  resources: ["daemonsets"]
+  verbs: ["get", "list", "watch"]
+---
+# Source: confidential-containers/charts/kata-as-coco-runtime/templates/post-delete-job.yaml
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: kata-as-coco-runtime-rb-cleanup
+  annotations:
+    "helm.sh/hook": post-delete
+    "helm.sh/hook-weight": "-1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kata-as-coco-runtime-role-cleanup
+subjects:
+- kind: ServiceAccount
+  name: kata-as-coco-runtime-sa-cleanup
+---
+# Source: confidential-containers/charts/kata-as-coco-runtime/templates/post-delete-job.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: kata-as-coco-runtime-cleanup
+  annotations:
+    "helm.sh/hook": post-delete
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  template:
+    metadata:
+      labels:
+        role: cleanup
+    spec:
+      serviceAccountName: kata-as-coco-runtime-sa-cleanup
+      hostPID: true
+      containers:
+      - name: kube-kata-cleanup
+        image: quay.io/kata-containers/kata-deploy:3.25.0
+        imagePullPolicy: Always
+        command: ["/opt/kata-artifacts/scripts/kata-deploy.sh", "cleanup"]
+        env:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: DEBUG
+          value: "false"
+        - name: SHIMS_X86_64
+          value: "qemu-coco-dev qemu-coco-dev-runtime-rs qemu-nvidia-gpu qemu-nvidia-gpu-snp qemu-nvidia-gpu-tdx qemu-snp qemu-tdx"
+        - name: SHIMS_AARCH64
+          value: "qemu-cca qemu-nvidia-gpu"
+        - name: SHIMS_S390X
+          value: "qemu-coco-dev qemu-coco-dev-runtime-rs qemu-se qemu-se-runtime-rs"
+        - name: DEFAULT_SHIM_X86_64
+          value: "qemu-tdx"
+        - name: DEFAULT_SHIM_AARCH64
+          value: "qemu"
+        - name: DEFAULT_SHIM_S390X
+          value: "qemu"
+        - name: DEFAULT_SHIM_PPC64LE
+          value: "qemu"
+        - name: SNAPSHOTTER_HANDLER_MAPPING_X86_64
+          value: "qemu-coco-dev:nydus,qemu-coco-dev-runtime-rs:nydus,qemu-snp:nydus,qemu-tdx:nydus"
+        - name: SNAPSHOTTER_HANDLER_MAPPING_AARCH64
+          value: "qemu-cca:nydus"
+        - name: SNAPSHOTTER_HANDLER_MAPPING_S390X
+          value: "qemu-coco-dev:nydus,qemu-coco-dev-runtime-rs:nydus,qemu-se:nydus,qemu-se-runtime-rs:nydus"
+        - name: PULL_TYPE_MAPPING_X86_64
+          value: "qemu-coco-dev:guest-pull,qemu-coco-dev-runtime-rs:guest-pull,qemu-nvidia-gpu-snp:guest-pull,qemu-nvidia-gpu-tdx:guest-pull,qemu-snp:guest-pull,qemu-tdx:guest-pull"
+        - name: PULL_TYPE_MAPPING_AARCH64
+          value: "qemu-cca:guest-pull"
+        - name: PULL_TYPE_MAPPING_S390X
+          value: "qemu-coco-dev:guest-pull,qemu-coco-dev-runtime-rs:guest-pull,qemu-se:guest-pull,qemu-se-runtime-rs:guest-pull"
+        - name: HELM_POST_DELETE_HOOK
+          value: "true"
+        - name: INSTALLATION_PREFIX
+          value: ""
+        - name: MULTI_INSTALL_SUFFIX
+          value: ""
+        - name: EXPERIMENTAL_SETUP_SNAPSHOTTER
+          value: "nydus"
+        - name: EXPERIMENTAL_FORCE_GUEST_PULL_X86_64
+          value: "qemu-nvidia-gpu-snp,qemu-nvidia-gpu-tdx"
+        securityContext:
+          privileged: true
+        volumeMounts:
+        - name: crio-conf
+          mountPath: /etc/crio/
+        - name: containerd-conf
+          mountPath: /etc/containerd/
+        - name: host
+          mountPath: /host/
+      volumes:
+      - name: crio-conf
+        hostPath:
+          path: /etc/crio/
+      - name: containerd-conf
+        hostPath:
+          path: '/etc/containerd/'
+      - name: host
+        hostPath:
+          path: /
+      restartPolicy: Never

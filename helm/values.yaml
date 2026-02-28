@@ -11,8 +11,8 @@ deploymentConfigs:
   gpu:
     katacontainers:
       resourceName: "nvidia.com/GH100_H100_PCIE"
-      runtimeClassName: "kata-nvidia-gpu-cc"
-      memory: "263840"
+      runtimeClassName: "kata-qemu-nvidia-gpu-tdx"
+      memory: "32768"
       vcpus: "12"
       count: 1
     env:
@@ -21,15 +21,15 @@ deploymentConfigs:
       limits:
         cpu: "16"
         memory: "32Gi"
-        nvidia.com/gpu: "1"
+        nvidia.com/gpu: 1
       requests:
         cpu: "12"
         memory: "24Gi"
-        nvidia.com/gpu: "1"
+        nvidia.com/gpu: 1
   cpu:
     katacontainers:
       resourceName: ""
-      runtimeClassName: "kata-cpu-cc"
+      runtimeClassName: "kata-qemu-tdx"
       memory: "32768"
       vcpus: "32"
       count: 0
@@ -51,13 +51,17 @@ deploymentConfigs:
 
 # Model configuration
 model:
-  repo: "RedHatAI/Llama-4-Scout-17B-16E-Instruct-quantized.w4a16"  # HuggingFace repo to download
-  localDir: "Llama-4-Scout-17B-16E-Instruct-quantized"             # Local directory name under /models-cache
-  servedName: "llama-4-scout-17b"                                  # Name exposed by vLLM API
-  toolCallParser: "llama4_pythonic"
+  # repo: "RedHatAI/Llama-4-Scout-17B-16E-Instruct-quantized.w4a16"  # HuggingFace repo to download
+  # localDir: "Llama-4-Scout-17B-16E-Instruct-quantized"             # Local directory name under /models-cache
+  # servedName: "llama-4-scout-17b"                                  # Name exposed by vLLM API
+  # toolCallParser: "llama4_pythonic"
+  repo: "meta-llama/Meta-Llama-3.1-8B-Instruct"
+  localDir: "Meta-Llama-3.1-8B-Instruct"
+  servedName: "llama-3.1-8b-instruct"
+  toolCallParser: "llama3_json"
   gpu:
-    - --max-model-len=32000
-    - --gpu-memory-utilization=0.98
+    - --max-model-len=16000 #32000 for llama4
+    - --gpu-memory-utilization=0.90 #0.98 for llama4
     - --enable-chunked-prefill
     - --enable_prefix_caching
     - --enforce-eager

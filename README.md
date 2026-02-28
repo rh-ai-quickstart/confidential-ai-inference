@@ -57,10 +57,14 @@ Confidential containers secure workloads with a seamless attestation and key rel
 - OpenShift CLI (`oc`) - [Download here](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html)
 - Helm CLI (`helm`) - [Download here](https://helm.sh/docs/intro/install/)
 
+Install the following operators on the OpenShift console:
+- OpenShift Sandboxed Containers Operator 1.9.0+
+
 **Required if running with GPU**
 
+Install the following operators on the OpenShift console:
 - Node Feature Discovery Operator 4.21.0+
-- Kernel Module Management 2.5.1+
+- Kernel Module Management Operator 2.5.1+
 - NVIDIA GPU Operator 25.10.1+
 
 ### Required user permissions
@@ -82,7 +86,7 @@ cd confidential-ai-inference
 ### Create the project
 
 ```bash
-PROJECT="cofidential-ai-demo"
+PROJECT="confidential-ai-demo"
 oc new-project ${PROJECT}
 ```
 
@@ -112,8 +116,8 @@ TODO: explain how to access the UI, give sample simple and complex queries of di
 To uninstall and delete the project:
 
 ```bash
-helm uninstall cofidential-ai
-oc delete project cofidential-ai-demo
+helm uninstall confidential-ai
+oc delete project confidential-ai-demo
 ```
 
 ## References 

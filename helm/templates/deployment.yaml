@@ -51,6 +51,12 @@ spec:
                 --revision main \
                 --local-dir /models-cache/{{ .Values.model.localDir }} \
                 {{ .Values.model.repo }}
+          env:
+            - name: HUGGING_FACE_HUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: huggingface-secret
+                  key: token
           securityContext:
             privileged: true
             runAsUser: 0
@@ -75,9 +81,7 @@ spec:
                 --enable-auto-tool-choice \
                 --tool-call-parser={{ .Values.model.toolCallParser }} \
                 --trust-remote-code \
-                {{- range $key, $val := (index .Values.deploymentConfigs .Values.device).model }}
-                --{{ $key }}={{ $val }} \
-                {{- end }}
+                {{ join " \\\n                " (index .Values.model .Values.device) }}
           {{- with (index .Values.deploymentConfigs .Values.device).resources }}
           resources:
             {{- toYaml . | nindent 12 }}
@@ -125,7 +129,7 @@ spec:
             timeoutSeconds: 1
             periodSeconds: 30
             successThreshold: 1
-            failureThreshold: 24
+            failureThreshold: 40
           volumeMounts:
             - name: shm
               mountPath: /dev/shm
@@ -140,7 +144,7 @@ spec:
             sizeLimit: 1Gi
         - name: models-cache
           emptyDir:
-            sizeLimit: 30Gi
+            sizeLimit: 64Gi
       dnsPolicy: ClusterFirst
       {{- with (index .Values.deploymentConfigs .Values.device).katacontainers.resourceName }}
       tolerations:
