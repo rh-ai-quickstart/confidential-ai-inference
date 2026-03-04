@@ -39,6 +39,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: kata-as-coco-runtime-sa
+  namespace: {{ .Release.Namespace }}
 ---
 # Source: confidential-containers/charts/kata-as-coco-runtime/templates/kata-deploy.yaml
 apiVersion: apps/v1
@@ -209,6 +210,7 @@ roleRef:
 subjects:
 - kind: ServiceAccount
   name: kata-as-coco-runtime-sa-cleanup
+  namespace: {{ .Release.Namespace }}
 ---
 # Source: confidential-containers/charts/kata-as-coco-runtime/templates/post-delete-job.yaml
 apiVersion: batch/v1

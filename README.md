@@ -57,24 +57,25 @@ Confidential containers secure workloads with a seamless attestation and key rel
 - OpenShift CLI (`oc`) - [Download here](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html)
 - Helm CLI (`helm`) - [Download here](https://helm.sh/docs/intro/install/)
 
-Install the following operators on the OpenShift console:
-- OpenShift Sandboxed Containers Operator 1.9.0+
+Install the following operators on the OpenShift console. Ensure compatibility with the installed OpenShift version.
+- OpenShift Sandboxed Containers Operator
 
 **Required if running with GPU**
 
-Install the following operators on the OpenShift console:
-- Node Feature Discovery Operator 4.21.0+
-- Kernel Module Management Operator 2.5.1+
-- NVIDIA GPU Operator 25.10.1+
+Install the following operators on the OpenShift console. Ensure compatibility with the installed OpenShift version.
+- Node Feature Discovery Operator
+- Kernel Module Management Operator
+- NVIDIA GPU Operator
 
-### Required user permissions
+### Additional
 
-- Standard user. No elevated cluster permissions required.
+- User permissions: standard user. No elevated cluster permissions required.
+- Hugging Face token: [acquire a token](https://huggingface.co/settings/tokens).
 
 
 ## Deploy
 
-This AI Quickstart will deploy a `Llama-4-Scout-17B-16E-Instruct-quantized` model with vLLM, but secured using confidential containers powered by Intel® TDX.
+This AI Quickstart will deploy the [RedHatAI/Llama-4-Scout-17B-16E-Instruct-quantized.w4a16](https://huggingface.co/RedHatAI/Llama-4-Scout-17B-16E-Instruct-quantized.w4a16) model with vLLM, but secured using confidential containers powered by Intel® TDX. This model was obtained by quantizing weights of [Llama-4-Scout-17B-16E-Instruct](https://huggingface.co/meta-llama/Llama-4-Scout-17B-16E-Instruct) to INT4, reducing memory and disk size requirements by approximately 75%.
 
 ### Clone the repository
 
@@ -101,7 +102,7 @@ oc adm policy add-scc-to-user privileged -z ${SA} -n ${PROJECT}
 
 ```bash
 export DEVICE="gpu" # options: [gpu]
-export HF_TOKEN="your-huggingface-token" # get yours at https://huggingface.co/settings/tokens
+export HF_TOKEN="your-huggingface-token"
 helm install ${PROJECT} helm/ --namespace ${PROJECT} --set device=${DEVICE} --set sa=${SA} --set hfToken=${HF_TOKEN}
 ```
 
