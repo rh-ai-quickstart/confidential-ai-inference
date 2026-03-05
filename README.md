@@ -87,11 +87,11 @@ cd confidential-ai-inference
 ### Create the project
 
 ```bash
-PROJECT="confidential-ai-demo"
+PROJECT="confidential-ai-inference"
 oc new-project ${PROJECT}
 ```
 
-### Create the security permissions (Required for GPU only)
+### Create the security permissions
 ```bash
 export SA="vllm-sa"
 oc create sa ${SA} -n ${PROJECT}
@@ -117,7 +117,7 @@ TODO: explain how to access the UI, give sample simple and complex queries of di
 To uninstall and delete the project:
 
 ```bash
-helm uninstall confidential-ai
+helm uninstall confidential-ai-inference
 oc delete project confidential-ai-demo
 ```
 
