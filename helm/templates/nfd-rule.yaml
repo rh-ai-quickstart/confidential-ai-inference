@@ -12,3 +12,20 @@ spec:
           matchExpressions:
             tdx.enabled:
               op: IsTrue
+---
+apiVersion: nfd.k8s-sigs.io/v1alpha1
+kind: NodeFeatureRule
+metadata:
+  name: nvidia-gpu-feature-rule
+spec:
+  rules:
+    - name: "nvidia-gpu"
+      labels:
+        "nvidia.com/gpu.present": "true"
+      matchFeatures:
+        - feature: pci.device
+          matchExpressions:
+            vendor:
+              op: In
+              value:
+                - "10de"  # NVIDIA vendor ID
