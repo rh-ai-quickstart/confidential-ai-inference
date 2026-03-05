@@ -19,6 +19,7 @@ Deploy confidential containers with Intel® Trust Domain Extensions (Intel® TDX
 - [Delete](#delete)
 - [References](#references)
 
+
 ## Detailed description
 
 When a model is run on a server, its proprietary weights, sensitive data and all queries received by the users reside in unencrypted system memory. This grants any privileged software or user, such as a cluster administrator, the ability to inspect—and potentially steal—the model and its queries during runtime. Exposing data while in use represents a severe breach of privacy, security, and intellectual property.
@@ -40,7 +41,6 @@ Confidential containers secure workloads with a seamless attestation and key rel
 
 
 ## Requirements
-
 
 ### Minimum hardware requirements 
 
@@ -107,19 +107,27 @@ helm install ${PROJECT} helm/ --namespace ${PROJECT} --set device=${DEVICE} --se
 ```
 
 
-
 ## Test
 
-TODO: explain how to access the UI, give sample simple and complex queries of different types, show which hardware is selected, and include screenshots of sample outputs
+The UI is exposed via an OpenShift Route with TLS. To get the URL, run this command:
+```bash
+oc get route open-webui -n confidential-ai-demo
+```
+
+Open this URL in a web browser. Enter in prompts to generate responses from the model, while being protected by Intel® TDX.
+
+To view the confidential container pod: TBD
+
 
 ## Delete
 
-To uninstall and delete the project:
-
+To uninstall and delete the project. The persistent volume claim needs to be deleted separately.
 ```bash
 helm uninstall confidential-ai-inference
+oc delete pvc models-cache-pvc
 oc delete project confidential-ai-demo
 ```
+
 
 ## References 
 

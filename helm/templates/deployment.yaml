@@ -29,7 +29,7 @@ spec:
       restartPolicy: Always
       schedulerName: default-scheduler
       affinity: {}
-      terminationGracePeriodSeconds: 120
+      terminationGracePeriodSeconds: 30
       runtimeClassName: {{ (index .Values.deploymentConfigs .Values.device).katacontainers.runtimeClassName }}
       securityContext:
         runAsUser: 0
@@ -41,6 +41,10 @@ spec:
             - /bin/bash
             - -c
             - |
+              if [ -d "/models-cache/{{ .Values.model.localDir }}" ] && [ "$(ls -A /models-cache/{{ .Values.model.localDir }})" ]; then
+                echo "Model already exists at /models-cache/{{ .Values.model.localDir }}, skipping download"
+                exit 0
+              fi
               mkdir -p /models-cache/hf && \
               mkdir -p /models-cache/.cache && \
               export HF_HOME=/models-cache/hf && \
@@ -143,8 +147,13 @@ spec:
             medium: Memory
             sizeLimit: 1Gi
         - name: models-cache
+          {{- if .Values.modelCache.persistentStorage }}
+          persistentVolumeClaim:
+            claimName: models-cache-pvc
+          {{- else }}
           emptyDir:
-            sizeLimit: 64Gi
+            sizeLimit: {{ .Values.modelCache.storageSize }}
+          {{- end }}
       dnsPolicy: ClusterFirst
       {{- with (index .Values.deploymentConfigs .Values.device).katacontainers.resourceName }}
       tolerations:

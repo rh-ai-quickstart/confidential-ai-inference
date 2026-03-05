@@ -1,0 +1,16 @@
+{{- if .Values.modelCache.persistentStorage }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: models-cache-pvc
+  annotations:
+    {{- if .Values.modelCache.keepOnUninstall }}
+    "helm.sh/resource-policy": keep
+    {{- end }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.modelCache.storageSize }}
+{{- end }}

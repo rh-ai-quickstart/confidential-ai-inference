@@ -220,8 +220,11 @@ metadata:
   annotations:
     "helm.sh/hook": post-delete
     "helm.sh/hook-weight": "0"
-    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded,hook-failed
+    "helm.sh/hook-timeout": "120"
 spec:
+  activeDeadlineSeconds: 120
+  backoffLimit: 0
   template:
     metadata:
       labels:

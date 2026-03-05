@@ -78,3 +78,11 @@ model:
 
 # Secret configuration
 hfToken: ""
+
+# Model cache configuration
+modelCache:
+  persistentStorage: true  # false = emptyDir (re-downloads every install)
+  keepOnUninstall: true     # false = PVC deleted on helm uninstall
+  # 64Gi for Llama 4 Scout w4a16 or Llama 3.1 8B
+  # 128Gi for Llama 4 Scout fp16
+  storageSize: "64Gi"
