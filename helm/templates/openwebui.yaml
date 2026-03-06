@@ -50,7 +50,7 @@ spec:
             memory: "1Gi"
         env:
         - name: OPENAI_API_BASE_URL
-          value: "http://vllm.{{ .Release.Namespace }}.svc.cluster.local:8080/v1"
+          value: "http://vllm-{{ .Values.device }}-service.{{ .Release.Namespace }}.svc.cluster.local:8080/v1"
         tty: true
         securityContext:
           runAsUser: 0

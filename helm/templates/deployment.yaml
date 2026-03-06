@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: vllm-{{ .Values.device }}
+  name: vllm-{{ .Values.device }}-confidential
   labels:
     app: vllm
     component: vllm
@@ -20,22 +20,26 @@ spec:
         {{- if eq .Values.device "gpu" }}
         cdi.k8s.io/gpu: nvidia.com/gpu=0
         {{- end }}
-        io.katacontainers.config.hypervisor.default_memory: '{{ (index .Values.deploymentConfigs .Values.device).katacontainers.memory }}'
-        io.katacontainers.config.hypervisor.default_vcpus: '{{ (index .Values.deploymentConfigs .Values.device).katacontainers.vcpus }}'
+        {{- with (index .Values.deploymentConfigs .Values.device).katacontainers.runtimeClassName }}
+        io.katacontainers.config.hypervisor.default_memory: '{{ (index $.Values.deploymentConfigs $.Values.device).katacontainers.memory }}'
+        io.katacontainers.config.hypervisor.default_vcpus: '{{ (index $.Values.deploymentConfigs $.Values.device).katacontainers.vcpus }}'
         io.katacontainers.config.hypervisor.kernel_params: agent.log=debug log_buf_len=1M systemd.log_level=debug debug systemd.log_target=console systemd.journald.forward_to_console=1 console=ttyS0 debug initrd=initrd
         io.katacontainers.config.runtime.create_container_timeout: '900'
+        {{- end }}
     spec:
       serviceAccountName: {{ .Values.sa }}
       restartPolicy: Always
       schedulerName: default-scheduler
       affinity: {}
       terminationGracePeriodSeconds: 30
-      runtimeClassName: {{ (index .Values.deploymentConfigs .Values.device).katacontainers.runtimeClassName }}
+      {{- with (index .Values.deploymentConfigs .Values.device).katacontainers.runtimeClassName }}
+      runtimeClassName: {{ . }}
+      {{- end }}
       securityContext:
         runAsUser: 0
       initContainers:
         - name: download-model
-          image: quay.io/confidential-devhub/rhaiis:latest
+          image: {{ (index .Values.deploymentConfigs .Values.device).image }}
           imagePullPolicy: IfNotPresent
           command:
             - /bin/bash
@@ -69,7 +73,7 @@ spec:
               mountPath: /models-cache
       containers:
         - name: server
-          image: 'quay.io/confidential-devhub/rhaiis:latest'
+          image: {{ (index .Values.deploymentConfigs .Values.device).image }}
           imagePullPolicy: IfNotPresent
           command:
             - /bin/bash

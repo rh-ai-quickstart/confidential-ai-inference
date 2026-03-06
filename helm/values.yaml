@@ -9,6 +9,7 @@ sa: "vllm-sa"
 # Device-specific configuration
 deploymentConfigs:
   gpu:
+    image: quay.io/confidential-devhub/rhaiis:latest
     katacontainers:
       resourceName: "nvidia.com/GH100_H100_PCIE"
       runtimeClassName: "kata-qemu-nvidia-gpu-tdx"
@@ -27,6 +28,7 @@ deploymentConfigs:
         memory: "24Gi"
         nvidia.com/gpu: 1
   cpu:
+    image: opea/vllm-cpu-ubi:v0.12.0-ubi9
     katacontainers:
       resourceName: ""
       runtimeClassName: "kata-qemu-tdx"

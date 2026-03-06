@@ -57,15 +57,30 @@ Confidential containers secure workloads with a seamless attestation and key rel
 - OpenShift CLI (`oc`) - [Download here](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html)
 - Helm CLI (`helm`) - [Download here](https://helm.sh/docs/intro/install/)
 
-Install the following operators on the OpenShift console. Ensure compatibility with the installed OpenShift version.
-- OpenShift Sandboxed Containers Operator
+Install the following from **OperatorHub** on the OpenShift console. This is a one-time setup.
 
-**Required if running with GPU**
+#### 1. OpenShift Sandboxed Containers Operator
+This is required to run Kata Containers, which are used to run Intel TDX-protected VMs (Trusted Domains).
 
-Install the following operators on the OpenShift console. Ensure compatibility with the installed OpenShift version.
-- Node Feature Discovery Operator
-- Kernel Module Management Operator
-- NVIDIA GPU Operator - in addition, create a cluster policy on the OpenShift console
+#### 2. Node Feature Discovery (NFD)
+- Install **Node Feature Discovery Operator** from OperatorHub into `openshift-nfd`
+- Go to **NFD → Create NodeFeatureDiscovery → Accept defaults → Create**
+- Verify:
+```bash
+oc get pods -n openshift-nfd
+# Should show nfd-controller-manager, nfd-master, nfd-worker all Running
+```
+
+#### 3. NVIDIA GPU Operator (GPU only)
+- Install **NVIDIA GPU Operator** from OperatorHub into `nvidia-gpu-operator`
+- Go to **NVIDIA GPU Operator → Create ClusterPolicy → Accept defaults → Create**
+- Wait 10-20 minutes for driver compilation, then verify:
+```bash
+oc get pods -n nvidia-gpu-operator
+# Should show all pods Running
+oc describe node $(oc get nodes -o jsonpath='{.items[0].metadata.name}') | grep -A 10 "Allocatable"
+# Should show nvidia.com/gpu: 1
+```
 
 ### Additional
 
@@ -101,7 +116,7 @@ oc adm policy add-scc-to-user privileged -z ${SA} -n ${PROJECT}
 ### Build and deploy the helm chart
 
 ```bash
-export DEVICE="gpu" # options: [gpu]
+export DEVICE="gpu" # options: [gpu, cpu]
 export HF_TOKEN="your-huggingface-token"
 helm install ${PROJECT} helm/ --namespace ${PROJECT} --set device=${DEVICE} --set sa=${SA} --set hfToken=${HF_TOKEN}
 ```
@@ -127,8 +142,3 @@ helm uninstall $PROJECT
 oc delete pvc models-cache-pvc
 oc delete project $PROJECT
 ```
-
-
-## References 
-
-TODO: optional
