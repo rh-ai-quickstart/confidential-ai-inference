@@ -56,8 +56,8 @@ model:
   servedName: "llama-4-scout-17b"                                  # Name exposed by vLLM API
   toolCallParser: "llama4_pythonic"
   gpu:
-    - --max-model-len=16000 #32000 for llama4
-    - --gpu-memory-utilization=0.90 #0.98 for llama4
+    - --max-model-len=32000
+    - --gpu-memory-utilization=0.98
     - --enable-chunked-prefill
     - --enable_prefix_caching
     - --enforce-eager
