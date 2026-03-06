@@ -65,7 +65,7 @@ Install the following operators on the OpenShift console. Ensure compatibility w
 Install the following operators on the OpenShift console. Ensure compatibility with the installed OpenShift version.
 - Node Feature Discovery Operator
 - Kernel Module Management Operator
-- NVIDIA GPU Operator
+- NVIDIA GPU Operator - in addition, create a cluster policy on the OpenShift console
 
 ### Additional
 
@@ -111,7 +111,7 @@ helm install ${PROJECT} helm/ --namespace ${PROJECT} --set device=${DEVICE} --se
 
 The UI is exposed via an OpenShift Route with TLS. To get the URL, run this command:
 ```bash
-oc get route open-webui -n confidential-ai-demo
+oc get route open-webui -n $PROJECT
 ```
 
 Open this URL in a web browser. Enter in prompts to generate responses from the model, while being protected by Intel® TDX.
@@ -123,9 +123,9 @@ To view the confidential container pod: TBD
 
 To uninstall and delete the project. The persistent volume claim needs to be deleted separately.
 ```bash
-helm uninstall confidential-ai-inference
+helm uninstall $PROJECT
 oc delete pvc models-cache-pvc
-oc delete project confidential-ai-demo
+oc delete project $PROJECT
 ```
 
 
