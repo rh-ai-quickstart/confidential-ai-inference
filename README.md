@@ -39,6 +39,9 @@ Confidential containers secure workloads with a seamless attestation and key rel
 ![Confidential Containers](docs/images/confidential_containers.png)
 *Confidential Containers utilize attestation services to ensure the environment is trustworthy before granting access.*
 
+![Demo Setup](docs/diagrams/arch.svg)
+*Kata Containers is a container runtime which allows running Intel TDX-protected VMs, isolating the vLLM engine and model from unauthorized access.*
+
 
 ## Requirements
 
