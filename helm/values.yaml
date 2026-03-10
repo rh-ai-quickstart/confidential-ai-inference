@@ -83,9 +83,19 @@ storage:
   # Set to "" to skip StorageClass creation and use the cluster default.
   className: "confidential-ai-local"
   # reclaimPolicy: Retain keeps PVs after PVC deletion; Delete removes them.
-  reclaimPolicy: "Retain"
+  reclaimPolicy: "Delete"
   # volumeBindingMode: WaitForFirstConsumer defers binding until a pod is scheduled.
   volumeBindingMode: "WaitForFirstConsumer"
+
+  # PersistentVolume configuration (used only with kubernetes.io/no-provisioner).
+  # Set nodeName to the node that physically hosts the directories below.
+  # Leave nodeName empty ("") to skip PV creation (e.g. when using a dynamic provisioner).
+  persistentVolumes:
+    nodeName: ""   # e.g. "worker-0.example.com"
+    modelCache:
+      hostPath: "/mnt/confidential-ai/models-cache"
+    openWebUI:
+      hostPath: "/mnt/confidential-ai/open-webui"
 
 # Model cache PVC configuration
 modelCache:
@@ -97,4 +107,3 @@ modelCache:
 openWebUI:
   storageSize: "2Gi"
   keepOnUninstall: false    # false = PVC deleted on helm uninstall
-  

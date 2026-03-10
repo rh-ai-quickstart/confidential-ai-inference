@@ -137,7 +137,7 @@ Open this URL in a web browser. Enter in prompts to generate responses from the 
 
 ## Delete
 
-To uninstall and delete the project. The persistent volume claim needs to be deleted separately.
+To uninstall and delete the project. The persistent volume claim for storing the models needs to be deleted separately.
 ```bash
 helm uninstall $PROJECT
 oc delete pvc models-cache-pvc
