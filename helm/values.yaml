@@ -77,8 +77,24 @@ model:
 # Secret configuration
 hfToken: ""
 
-# Model cache configuration
+# Storage class configuration
+storage:
+  # Name of the StorageClass created by this chart.
+  # Set to "" to skip StorageClass creation and use the cluster default.
+  className: "confidential-ai-local"
+  # reclaimPolicy: Retain keeps PVs after PVC deletion; Delete removes them.
+  reclaimPolicy: "Retain"
+  # volumeBindingMode: WaitForFirstConsumer defers binding until a pod is scheduled.
+  volumeBindingMode: "WaitForFirstConsumer"
+
+# Model cache PVC configuration
 modelCache:
   persistentStorage: true  # false = emptyDir (re-downloads every install)
   keepOnUninstall: true    # false = PVC deleted on helm uninstall
   storageSize: "64Gi"
+
+# Open WebUI PVC configuration
+openWebUI:
+  storageSize: "2Gi"
+  keepOnUninstall: false    # false = PVC deleted on helm uninstall
+  

@@ -1,8 +1,35 @@
+{{- /*
+  StorageClass — only created when storage.className is non-empty.
+  Uses kubernetes.io/no-provisioner so the admin can pre-provision PVs,
+  or swap the provisioner for a dynamic one (e.g. rancher.io/local-path).
+*/}}
+{{- if .Values.storage.className }}
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: {{ .Values.storage.className }}
+  labels:
+    {{- include "confidential-ai-inference.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/resource-policy": keep
+provisioner: kubernetes.io/no-provisioner
+reclaimPolicy: {{ .Values.storage.reclaimPolicy }}
+volumeBindingMode: {{ .Values.storage.volumeBindingMode }}
+{{- end }}
+---
+{{- /*
+  PVC: model cache — holds downloaded HuggingFace model weights.
+  Protected with helm.sh/resource-policy: keep so a `helm uninstall`
+  does not wipe the ~64 Gi of downloaded weights.
+*/}}
 {{- if .Values.modelCache.persistentStorage }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: models-cache-pvc
+  labels:
+    {{- include "confidential-ai-inference.labels" . | nindent 4 }}
+    app.kubernetes.io/component: model-cache
   annotations:
     {{- if .Values.modelCache.keepOnUninstall }}
     "helm.sh/resource-policy": keep
@@ -10,7 +37,34 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
+  {{- if .Values.storage.className }}
+  storageClassName: {{ .Values.storage.className }}
+  {{- end }}
   resources:
     requests:
       storage: {{ .Values.modelCache.storageSize }}
 {{- end }}
+---
+{{- /*
+  PVC: Open WebUI — persists chat history, users, and settings.
+*/}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: open-webui-pvc
+  labels:
+    {{- include "confidential-ai-inference.labels" . | nindent 4 }}
+    app.kubernetes.io/component: open-webui
+  annotations:
+    {{- if .Values.openWebUI.keepOnUninstall }}
+    "helm.sh/resource-policy": keep
+    {{- end }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  {{- if .Values.storage.className }}
+  storageClassName: {{ .Values.storage.className }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.openWebUI.storageSize }}

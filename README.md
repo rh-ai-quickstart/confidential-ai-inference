@@ -134,8 +134,6 @@ oc get route open-webui -n $PROJECT
 
 Open this URL in a web browser. Enter in prompts to generate responses from the model, while being protected by Intel® TDX.
 
-To view the confidential container pod: TBD
-
 
 ## Delete
 

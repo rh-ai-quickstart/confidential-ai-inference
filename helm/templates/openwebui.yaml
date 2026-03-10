@@ -1,16 +1,4 @@
 apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  labels:
-    app: open-webui
-  name: open-webui
-spec:
-  accessModes: ["ReadWriteOnce"]
-  resources:
-    requests:
-      storage: 2Gi
----
-apiVersion: v1
 kind: Service
 metadata:
   name: open-webui
@@ -60,7 +48,7 @@ spec:
       volumes:
       - name: webui-volume
         persistentVolumeClaim:
-          claimName: open-webui
+          claimName: open-webui-pvc
 ---
 kind: Route
 apiVersion: route.openshift.io/v1
