@@ -87,7 +87,7 @@ storage:
   # Set nodeName to the node that physically hosts the directories below.
   # Leave nodeName empty ("") to skip PV creation (e.g. when using a dynamic provisioner).
   persistentVolumes:
-    nodeName: ""   # e.g. "worker-0.example.com"
+    nodeName: "confidential-ai-node"
     modelCache:
       hostPath: "/mnt/confidential-ai/models-cache"
     openWebUI:
