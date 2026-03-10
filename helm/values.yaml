@@ -79,13 +79,9 @@ hfToken: ""
 
 # Storage class configuration
 storage:
-  # Name of the StorageClass created by this chart.
-  # Set to "" to skip StorageClass creation and use the cluster default.
   className: "confidential-ai-local"
-  # reclaimPolicy: Retain keeps PVs after PVC deletion; Delete removes them.
-  reclaimPolicy: "Delete"
-  # volumeBindingMode: WaitForFirstConsumer defers binding until a pod is scheduled.
-  volumeBindingMode: "WaitForFirstConsumer"
+  reclaimPolicy: "Retain"
+  volumeBindingMode: "Immediate"
 
   # PersistentVolume configuration (used only with kubernetes.io/no-provisioner).
   # Set nodeName to the node that physically hosts the directories below.
