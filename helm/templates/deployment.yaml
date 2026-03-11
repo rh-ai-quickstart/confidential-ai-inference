@@ -17,9 +17,6 @@ spec:
         app: vllm
         component: vllm
       annotations:
-        {{- if eq .Values.device "gpu" }}
-        cdi.k8s.io/gpu: nvidia.com/gpu=0
-        {{- end }}
         {{- with (index .Values.deploymentConfigs .Values.device).katacontainers.runtimeClassName }}
         io.katacontainers.config.hypervisor.default_memory: '{{ (index $.Values.deploymentConfigs $.Values.device).katacontainers.memory }}'
         io.katacontainers.config.hypervisor.default_vcpus: '{{ (index $.Values.deploymentConfigs $.Values.device).katacontainers.vcpus }}'
@@ -30,6 +27,8 @@ spec:
       serviceAccountName: {{ .Values.sa }}
       restartPolicy: Always
       schedulerName: default-scheduler
+      enableServiceLinks: true
+      preemptionPolicy: PreemptLowerPriority
       affinity: {}
       terminationGracePeriodSeconds: 30
       {{- with (index .Values.deploymentConfigs .Values.device).katacontainers.runtimeClassName }}
@@ -37,6 +36,10 @@ spec:
       {{- end }}
       securityContext:
         runAsUser: 0
+        seLinuxOptions:
+          level: "s0:c29,c4"
+      nodeSelector:
+        node-role.kubernetes.io/master: ""
       initContainers:
         - name: download-model
           image: {{ (index .Values.deploymentConfigs .Values.device).image }}
@@ -107,6 +110,9 @@ spec:
           securityContext:
             privileged: true
             runAsUser: 0
+            capabilities:
+              drop:
+                - MKNOD
           ports:
             - name: http
               containerPort: 8080
@@ -159,11 +165,20 @@ spec:
             sizeLimit: {{ .Values.modelCache.storageSize }}
           {{- end }}
       dnsPolicy: ClusterFirst
-      {{- with (index .Values.deploymentConfigs .Values.device).katacontainers.resourceName }}
       tolerations:
+        - key: node.kubernetes.io/not-ready
+          operator: Exists
+          effect: NoExecute
+          tolerationSeconds: 300
+        - key: node.kubernetes.io/unreachable
+          operator: Exists
+          effect: NoExecute
+          tolerationSeconds: 300
+        {{- with (index .Values.deploymentConfigs .Values.device).katacontainers.resourceName }}
         - key: {{ . }}
+          operator: Exists
           effect: NoSchedule
-      {{- end }}
+        {{- end }}
   strategy:
     type: Recreate
   revisionHistoryLimit: 10

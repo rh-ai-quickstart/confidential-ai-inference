@@ -12,7 +12,7 @@ deploymentConfigs:
     image: quay.io/confidential-devhub/rhaiis:latest
     katacontainers:
       resourceName: "nvidia.com/GH100_H100_PCIE"
-      runtimeClassName: "kata-cc-nvidia-gpu"
+      runtimeClassName: "kata-cc-nvidia-gpu-tdx"
       memory: "32768"
       vcpus: "12"
       count: 1
@@ -22,16 +22,16 @@ deploymentConfigs:
       limits:
         cpu: "16"
         memory: "32Gi"
-        nvidia.com/gpu: 1
+        nvidia.com/pgpu: 1
       requests:
         cpu: "8"
         memory: "24Gi"
-        nvidia.com/gpu: 1
+        nvidia.com/pgpu: 1
   cpu:
     image: opea/vllm-cpu-ubi:v0.12.0-ubi9
     katacontainers:
       resourceName: ""
-      runtimeClassName: "kata-cc"
+      runtimeClassName: "kata-cc-tdx"
       memory: "32768"
       vcpus: "32"
       count: 0
