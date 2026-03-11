@@ -55,8 +55,8 @@ Confidential containers secure workloads with a seamless attestation and key rel
 
 ### Minimum software requirements
 
-- Red Hat OpenShift
-- Red Hat OpenShift AI 2.16+
+- Red Hat OpenShift 4.20.6+
+- Red Hat OpenShift AI 2.25+
 - OpenShift CLI (`oc`) - [Download here](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html)
 - Helm CLI (`helm`) - [Download here](https://helm.sh/docs/intro/install/)
 
@@ -135,7 +135,7 @@ oc adm policy add-scc-to-user privileged -z ${SA} -n ${PROJECT}
 ```bash
 export DEVICE="gpu" # options: [gpu, cpu]
 export HF_TOKEN="your-huggingface-token"
-export STORAGE_CLASS_NAME="your-lvm-storageclass-name"
+export STORAGE_CLASS_NAME="your-lvm-storageclass-name" # default: lvms-vg1
 helm install ${PROJECT} helm/ --namespace ${PROJECT} --set device=${DEVICE} --set sa=${SA} --set hfToken=${HF_TOKEN} --set storageClassName=${STORAGE_CLASS_NAME}
 ```
 
