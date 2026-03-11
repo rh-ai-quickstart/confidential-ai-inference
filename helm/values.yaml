@@ -11,11 +11,8 @@ deploymentConfigs:
   gpu:
     image: quay.io/confidential-devhub/rhaiis:latest
     katacontainers:
-      resourceName: "nvidia.com/GH100_H100_PCIE"
+      resourceName: "nvidia.com/pgpu"
       runtimeClassName: "kata-cc-nvidia-gpu"
-      memory: "49152"
-      vcpus: "16"
-      count: 1
     nodeSelector:
       node-role.kubernetes.io/master: ""
     env:
@@ -92,7 +89,7 @@ storageClassName: lvms-vg1
 modelCache:
   persistentStorage: true  # false = emptyDir (re-downloads every install)
   keepOnUninstall: true    # false = PVC deleted on helm uninstall
-  storageSize: "30Gi"
+  storageSize: "64Gi"
 
 # Open WebUI PVC configuration
 openWebUI:

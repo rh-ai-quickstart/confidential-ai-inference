@@ -18,9 +18,6 @@ spec:
         component: vllm
       annotations:
         {{- with (index .Values.deploymentConfigs .Values.device).katacontainers.runtimeClassName }}
-        io.katacontainers.config.hypervisor.default_memory: '{{ (index $.Values.deploymentConfigs $.Values.device).katacontainers.memory }}'
-        io.katacontainers.config.hypervisor.default_vcpus: '{{ (index $.Values.deploymentConfigs $.Values.device).katacontainers.vcpus }}'
-        io.katacontainers.config.hypervisor.kernel_params: agent.log=debug log_buf_len=1M systemd.log_level=debug debug systemd.log_target=console systemd.journald.forward_to_console=1 console=ttyS0 debug initrd=initrd
         io.katacontainers.config.runtime.create_container_timeout: '1800'
         {{- end }}
     spec:
