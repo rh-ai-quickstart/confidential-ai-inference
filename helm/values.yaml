@@ -18,6 +18,8 @@ deploymentConfigs:
       count: 1
     nodeSelector:
       node-role.kubernetes.io/master: ""
+    env:
+      CUDA_VISIBLE_DEVICES: "0"
     resources:
       limits:
         cpu: "16"

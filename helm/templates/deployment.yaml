@@ -29,7 +29,6 @@ spec:
       schedulerName: default-scheduler
       enableServiceLinks: true
       preemptionPolicy: PreemptLowerPriority
-      affinity: {}
       terminationGracePeriodSeconds: 30
       {{- with (index .Values.deploymentConfigs .Values.device).katacontainers.runtimeClassName }}
       runtimeClassName: {{ . }}
