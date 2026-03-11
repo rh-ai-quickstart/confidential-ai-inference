@@ -13,7 +13,7 @@ deploymentConfigs:
     katacontainers:
       resourceName: "nvidia.com/GH100_H100_PCIE"
       runtimeClassName: "kata-cc-nvidia-gpu"
-      memory: "49152"
+      memory: "24576"
       vcpus: "16"
       count: 1
     nodeSelector:
@@ -23,11 +23,11 @@ deploymentConfigs:
     resources:
       limits:
         cpu: "16"
-        memory: "48Gi"
+        memory: "24Gi"
         nvidia.com/pgpu: 1
       requests:
         cpu: "8"
-        memory: "32Gi"
+        memory: "20Gi"
         nvidia.com/pgpu: 1
   cpu:
     image: opea/vllm-cpu-ubi:v0.12.0-ubi9
@@ -66,7 +66,7 @@ model:
   toolCallParser: "llama3_json"
   gpu:
     - --max-model-len=32000
-    - --gpu-memory-utilization=0.98
+    - --gpu-memory-utilization=0.90
     - --enable-chunked-prefill
     - --enable_prefix_caching
     - --enforce-eager
@@ -92,7 +92,7 @@ storageClassName: lvms-vg1
 modelCache:
   persistentStorage: true  # false = emptyDir (re-downloads every install)
   keepOnUninstall: true    # false = PVC deleted on helm uninstall
-  storageSize: "64Gi"
+  storageSize: "30Gi"
 
 # Open WebUI PVC configuration
 openWebUI:
