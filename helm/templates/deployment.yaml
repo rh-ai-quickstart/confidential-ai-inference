@@ -38,8 +38,10 @@ spec:
         runAsUser: 0
         seLinuxOptions:
           level: "s0:c29,c4"
+      {{- with (index .Values.deploymentConfigs .Values.device).nodeSelector }}
       nodeSelector:
-        node-role.kubernetes.io/master: ""
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       initContainers:
         - name: download-model
           image: {{ (index .Values.deploymentConfigs .Values.device).image }}

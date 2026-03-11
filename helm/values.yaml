@@ -6,7 +6,7 @@
 device: "gpu"  # Options: ["gpu", "cpu"]
 sa: "vllm-sa"
 
-# Device-specific configuration
+# Device-specific deployment configuration
 deploymentConfigs:
   gpu:
     image: quay.io/confidential-devhub/rhaiis:latest
@@ -16,6 +16,7 @@ deploymentConfigs:
       memory: "32768"
       vcpus: "12"
       count: 1
+    nodeSelector: {}
     env:
       CUDA_VISIBLE_DEVICES: "0"
     resources:
@@ -35,6 +36,7 @@ deploymentConfigs:
       memory: "32768"
       vcpus: "32"
       count: 0
+    nodeSelector: {}
     env:
       VLLM_CPU_KVCACHE_SPACE: "40"
       VLLM_RPC_TIMEOUT: "100000"
