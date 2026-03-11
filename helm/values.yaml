@@ -54,10 +54,14 @@ deploymentConfigs:
 
 # Model configuration
 model:
-  repo: "RedHatAI/Llama-4-Scout-17B-16E-Instruct-quantized.w4a16"  # HuggingFace repo to download
-  localDir: "Llama-4-Scout-17B-16E-Instruct-quantized"             # Local directory name under /models-cache
-  servedName: "Llama-4-Scout-17B-16E-Instruct-quantized"           # Name exposed by vLLM API
-  toolCallParser: "llama4_pythonic"
+  # repo: "RedHatAI/Llama-4-Scout-17B-16E-Instruct-quantized.w4a16"  # HuggingFace repo to download
+  # localDir: "Llama-4-Scout-17B-16E-Instruct-quantized"             # Local directory name under /models-cache
+  # servedName: "Llama-4-Scout-17B-16E-Instruct-quantized"           # Name exposed by vLLM API
+  # toolCallParser: "llama4_pythonic"
+  repo: "meta-llama/Meta-Llama-3.1-8B-Instruct"  # HuggingFace repo to download
+  localDir: "Meta-Llama-3.1-8B-Instruct"         # Local directory name under /models-cache
+  servedName: "Meta-Llama-3.1-8B-Instruct"       # Name exposed by vLLM API
+  toolCallParser: "llama3_json"
   gpu:
     - --max-model-len=32000
     - --gpu-memory-utilization=0.98
