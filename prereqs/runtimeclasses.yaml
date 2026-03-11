@@ -1,39 +1,11 @@
 ---
-# RuntimeClasses for Kata Containers
+# RuntimeClasses for Kata Containers with TDX support
 # Apply once before running helm install:
 #   oc apply -f prereqs/runtimeclasses.yaml
-kind: RuntimeClass
-apiVersion: node.k8s.io/v1
-metadata:
-  name: kata-cc
-  labels:
-    app.kubernetes.io/managed-by: kata-deploy
-    kata-deploy/instance: "default"
-handler: kata-qemu
-overhead:
-  podFixed:
-    memory: "160Mi"
-    cpu: "250m"
-scheduling:
-  nodeSelector:
-    katacontainers.io/kata-runtime: "true"
----
-kind: RuntimeClass
-apiVersion: node.k8s.io/v1
-metadata:
-  name: kata-cc-nvidia-gpu
-  labels:
-    app.kubernetes.io/managed-by: kata-deploy
-    kata-deploy/instance: "default"
-handler: kata-qemu-nvidia-gpu
-overhead:
-  podFixed:
-    memory: "20480Mi"
-    cpu: "1.0"
-scheduling:
-  nodeSelector:
-    katacontainers.io/kata-runtime: "true"
----
+#
+# Note: kata-cc and kata-cc-nvidia-gpu are automatically created by
+# the KataConfig CR (OpenShift Sandboxed Containers Operator) and
+# should NOT be managed here.
 kind: RuntimeClass
 apiVersion: node.k8s.io/v1
 metadata:
