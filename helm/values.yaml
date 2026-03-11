@@ -16,9 +16,8 @@ deploymentConfigs:
       memory: "49152"
       vcpus: "16"
       count: 1
-    nodeSelector: {}
-    env:
-      CUDA_VISIBLE_DEVICES: "0"
+    nodeSelector:
+      node-role.kubernetes.io/master: ""
     resources:
       limits:
         cpu: "16"
