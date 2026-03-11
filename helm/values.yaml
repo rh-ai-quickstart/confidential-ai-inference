@@ -13,7 +13,7 @@ deploymentConfigs:
     katacontainers:
       resourceName: "nvidia.com/GH100_H100_PCIE"
       runtimeClassName: "kata-cc-nvidia-gpu"
-      memory: "24576"
+      memory: "49152"
       vcpus: "16"
       count: 1
     nodeSelector:
@@ -23,11 +23,11 @@ deploymentConfigs:
     resources:
       limits:
         cpu: "16"
-        memory: "24Gi"
+        memory: "48Gi"
         nvidia.com/pgpu: 1
       requests:
         cpu: "8"
-        memory: "20Gi"
+        memory: "40Gi"
         nvidia.com/pgpu: 1
   cpu:
     image: opea/vllm-cpu-ubi:v0.12.0-ubi9
