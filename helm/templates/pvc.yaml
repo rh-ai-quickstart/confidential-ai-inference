@@ -1,95 +1,4 @@
-{{- /*
-  StorageClass — only created when storage.className is non-empty.
-  Uses kubernetes.io/no-provisioner so the admin can pre-provision PVs,
-  or swap the provisioner for a dynamic one (e.g. rancher.io/local-path).
-*/}}
-{{- if .Values.storage.className }}
-apiVersion: storage.k8s.io/v1
-kind: StorageClass
-metadata:
-  name: {{ .Values.storage.className }}
-  labels:
-    {{- include "confidential-ai-inference.labels" . | nindent 4 }}
-  annotations:
-    "helm.sh/resource-policy": keep
-provisioner: kubernetes.io/no-provisioner
-reclaimPolicy: {{ .Values.storage.reclaimPolicy }}
-volumeBindingMode: {{ .Values.storage.volumeBindingMode }}
-{{- end }}
----
-{{- /*
-  PersistentVolumes — only created when a nodeName is provided.
-  Required for kubernetes.io/no-provisioner (static provisioning).
-  Each PV is pre-bound to its PVC via claimRef so Kubernetes never
-  accidentally matches the wrong volume.
-*/}}
-{{- if .Values.storage.persistentVolumes.nodeName }}
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: models-cache-pv
-  labels:
-    {{- include "confidential-ai-inference.labels" . | nindent 4 }}
-    app.kubernetes.io/component: model-cache
-  annotations:
-    "helm.sh/resource-policy": keep
-spec:
-  capacity:
-    storage: {{ .Values.modelCache.storageSize }}
-  accessModes:
-    - ReadWriteOnce
-  persistentVolumeReclaimPolicy: {{ .Values.storage.reclaimPolicy }}
-  storageClassName: {{ .Values.storage.className }}
-  local:
-    path: {{ .Values.storage.persistentVolumes.modelCache.hostPath }}
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-        - matchExpressions:
-            - key: kubernetes.io/hostname
-              operator: In
-              values:
-                - {{ .Values.storage.persistentVolumes.nodeName | quote }}
-  claimRef:
-    namespace: {{ .Release.Namespace }}
-    name: models-cache-pvc
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: open-webui-pv
-  labels:
-    {{- include "confidential-ai-inference.labels" . | nindent 4 }}
-    app.kubernetes.io/component: open-webui
-  annotations:
-    "helm.sh/resource-policy": keep
-spec:
-  capacity:
-    storage: {{ .Values.openWebUI.storageSize }}
-  accessModes:
-    - ReadWriteOnce
-  persistentVolumeReclaimPolicy: {{ .Values.storage.reclaimPolicy }}
-  storageClassName: {{ .Values.storage.className }}
-  local:
-    path: {{ .Values.storage.persistentVolumes.openWebUI.hostPath }}
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-        - matchExpressions:
-            - key: kubernetes.io/hostname
-              operator: In
-              values:
-                - {{ .Values.storage.persistentVolumes.nodeName | quote }}
-  claimRef:
-    namespace: {{ .Release.Namespace }}
-    name: open-webui-pvc
-{{- end }}
----
-{{- /*
-  PVC: model cache — holds downloaded HuggingFace model weights.
-  Protected with helm.sh/resource-policy: keep so a `helm uninstall`
-  does not wipe the ~64 Gi of downloaded weights.
-*/}}
+
 {{- if .Values.modelCache.persistentStorage }}
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -105,8 +14,8 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  {{- if .Values.storage.className }}
-  storageClassName: {{ .Values.storage.className }}
+  {{- if .Values.storageClassName }}
+  storageClassName: {{ .Values.storageClassName }}
   {{- end }}
   resources:
     requests:
@@ -130,8 +39,8 @@ metadata:
 spec:
   accessModes:
     - ReadWriteOnce
-  {{- if .Values.storage.className }}
-  storageClassName: {{ .Values.storage.className }}
+  {{- if .Values.storageClassName }}
+  storageClassName: {{ .Values.storageClassName }}
   {{- end }}
   resources:
     requests:

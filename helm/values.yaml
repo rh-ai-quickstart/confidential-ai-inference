@@ -77,21 +77,9 @@ model:
 # Secret configuration
 hfToken: ""
 
-# Storage class configuration
-storage:
-  className: "confidential-ai-local"
-  reclaimPolicy: "Retain"
-  volumeBindingMode: "Immediate"
-
-  # PersistentVolume configuration (used only with kubernetes.io/no-provisioner).
-  # Set nodeName to the node that physically hosts the directories below.
-  # Leave nodeName empty ("") to skip PV creation (e.g. when using a dynamic provisioner).
-  persistentVolumes:
-    nodeName: "confidential-ai-node"
-    modelCache:
-      hostPath: "/mnt/confidential-ai/models-cache"
-    openWebUI:
-      hostPath: "/mnt/confidential-ai/open-webui"
+# StorageClass configuration
+# Create an LVM Cluster using the LVM Storage operator, then specify the name of the StorageClass here
+storageClassName: lvms-vg1
 
 # Model cache PVC configuration
 modelCache:

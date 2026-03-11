@@ -60,13 +60,13 @@ Confidential containers secure workloads with a seamless attestation and key rel
 - OpenShift CLI (`oc`) - [Download here](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html)
 - Helm CLI (`helm`) - [Download here](https://helm.sh/docs/intro/install/)
 
-Install the following from **OperatorHub** on the OpenShift console. This is a one-time setup.
+Install the following from **OperatorHub/Software Catalog** on the OpenShift console. This is a one-time setup.
 
 #### 1. OpenShift Sandboxed Containers Operator
 This is required to run Kata Containers, which are used to run Intel TDX-protected VMs (Trusted Domains).
 
 #### 2. Node Feature Discovery (NFD)
-- Install **Node Feature Discovery Operator** from OperatorHub into `openshift-nfd`
+- Install **Node Feature Discovery Operator** from OperatorHub/Software Catalog into `openshift-nfd`
 - Go to **NFD → Create NodeFeatureDiscovery → Accept defaults → Create**
 - Verify:
 ```bash
@@ -75,7 +75,7 @@ oc get pods -n openshift-nfd
 ```
 
 #### 3. NVIDIA GPU Operator (GPU only)
-- Install **NVIDIA GPU Operator** from OperatorHub into `nvidia-gpu-operator`
+- Install **NVIDIA GPU Operator** from OperatorHub/Software Catalog into `nvidia-gpu-operator`
 - Go to **NVIDIA GPU Operator → Create ClusterPolicy → Accept defaults → Create**
 - Wait 10-20 minutes for driver compilation, then verify:
 ```bash
@@ -84,6 +84,15 @@ oc get pods -n nvidia-gpu-operator
 oc describe node $(oc get nodes -o jsonpath='{.items[0].metadata.name}') | grep -A 10 "Allocatable"
 # Should show nvidia.com/gpu: 1
 ```
+
+#### 4. LVM Storage
+- Install a blank secondary disk. Wipe it empty and acquire the persistent path i.e. /dev/disk/by-path/pci-xxxx:xx:xx.x-nvme-x
+- Install **LVM Storage** from OperatorHub/Software Catalog into `openshift-storage`
+- Go to **LVM Storage → Create LVMCluster → storage → deviceClasses → deviceSelector → paths**
+- Add the path to the secondary disk.
+- Press "Create".
+- Go to StorageClass and update this disk to be the default class. All required PersistentVolumes and PersistentVolumeClaims will be based on this StorageClass. Note down the name of this StorageClass.
+
 
 ### Additional
 
@@ -100,6 +109,11 @@ This AI Quickstart will deploy the [RedHatAI/Llama-4-Scout-17B-16E-Instruct-quan
 ```bash
 git clone https://github.com/rh-ai-quickstart/confidential-ai-inference
 cd confidential-ai-inference
+```
+
+### Checkout this branch
+```bash
+git checkout initial-commit
 ```
 
 ### Create the project
@@ -121,7 +135,8 @@ oc adm policy add-scc-to-user privileged -z ${SA} -n ${PROJECT}
 ```bash
 export DEVICE="gpu" # options: [gpu, cpu]
 export HF_TOKEN="your-huggingface-token"
-helm install ${PROJECT} helm/ --namespace ${PROJECT} --set device=${DEVICE} --set sa=${SA} --set hfToken=${HF_TOKEN}
+export STORAGE_CLASS_NAME="your-lvm-storageclass-name"
+helm install ${PROJECT} helm/ --namespace ${PROJECT} --set device=${DEVICE} --set sa=${SA} --set hfToken=${HF_TOKEN} --set storageClassName=${STORAGE_CLASS_NAME}
 ```
 
 
