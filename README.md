@@ -65,6 +65,11 @@ Install the following from **OperatorHub/Software Catalog** on the OpenShift con
 #### 1. OpenShift Sandboxed Containers Operator
 This is required to run Kata Containers, which are used to run Intel TDX-protected VMs (Trusted Domains).
 
+After installing the operator, apply the RuntimeClasses:
+```bash
+oc apply -f prereqs/runtimeclasses.yaml
+```
+
 #### 2. Node Feature Discovery (NFD)
 - Install **Node Feature Discovery Operator** from OperatorHub/Software Catalog into `openshift-nfd`
 - Go to **NFD → Create NodeFeatureDiscovery → Accept defaults → Create**
