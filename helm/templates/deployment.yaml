@@ -93,7 +93,18 @@ spec:
                 {{ join " \\\n                " (index .Values.model .Values.device) }}
           {{- with (index .Values.deploymentConfigs .Values.device).resources }}
           resources:
-            {{- toYaml . | nindent 12 }}
+            limits:
+              cpu: {{ .limits.cpu }}
+              memory: {{ .limits.memory }}
+              {{- with (index $.Values.deploymentConfigs $.Values.device).katacontainers.resourceName }}
+              {{ . }}: '1'
+              {{- end }}
+            requests:
+              cpu: {{ .requests.cpu }}
+              memory: {{ .requests.memory }}
+              {{- with (index $.Values.deploymentConfigs $.Values.device).katacontainers.resourceName }}
+              {{ . }}: '1'
+              {{- end }}
           {{- end }}
           env:
             - name: HUGGING_FACE_HUB_TOKEN
