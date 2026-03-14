@@ -86,7 +86,7 @@ oc get pods -n openshift-nfd
 ```bash
 oc get pods -n nvidia-gpu-operator
 # Should show all pods Running
-oc describe node $(oc get nodes -o jsonpath='{.items[0].metadata.name}') | grep -A 10 "Allocatable"
+oc describe node $(oc get nodes -o jsonpath='{.items[0].metadata.name}') | grep -A 20 "Allocatable"
 # Should show nvidia.com/gpu: 1
 ```
 

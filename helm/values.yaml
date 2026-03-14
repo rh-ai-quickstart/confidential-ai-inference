@@ -83,10 +83,8 @@ hfToken: ""
 # Create an LVM Cluster using the LVM Storage operator, then specify the name of the StorageClass here
 storageClassName: lvms-vg1
 
-# Model cache PVC configuration
+# Model cache block volume configuration
 modelCache:
-  persistentStorage: true  # false = emptyDir (re-downloads every install)
-  keepOnUninstall: true    # false = PVC deleted on helm uninstall
   storageSize: "64Gi"
 
 # Open WebUI PVC configuration

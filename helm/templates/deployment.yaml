@@ -166,13 +166,8 @@ spec:
             medium: Memory
             sizeLimit: 1Gi
         - name: models-cache
-          {{- if .Values.modelCache.persistentStorage }}
-          persistentVolumeClaim:
-            claimName: models-cache-pvc
-          {{- else }}
           emptyDir:
             sizeLimit: {{ .Values.modelCache.storageSize }}
-          {{- end }}
       dnsPolicy: ClusterFirst
       tolerations:
         - key: node.kubernetes.io/not-ready
