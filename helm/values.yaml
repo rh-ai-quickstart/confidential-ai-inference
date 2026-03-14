@@ -19,11 +19,11 @@ deploymentConfigs:
       CUDA_VISIBLE_DEVICES: "0"
     resources:
       limits:
-        cpu: "16"
-        memory: "48Gi"
+        cpu: "32"
+        memory: "80Gi"
       requests:
-        cpu: "8"
-        memory: "40Gi"
+        cpu: "16"
+        memory: "64Gi"
   cpu:
     image: opea/vllm-cpu-ubi:v0.12.0-ubi9
     katacontainers:
@@ -43,10 +43,10 @@ deploymentConfigs:
     resources:
       limits:
         cpu: "64"
-        memory: "64Gi"
+        memory: "80Gi"
       requests:
         cpu: "32"
-        memory: "32Gi"
+        memory: "64Gi"
     
 
 # Model configuration
