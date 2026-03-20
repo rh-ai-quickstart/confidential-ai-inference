@@ -21,9 +21,11 @@ deploymentConfigs:
       limits:
         cpu: "32"
         memory: "80Gi"
+        nvidia.com/pgpu: 1
       requests:
         cpu: "16"
         memory: "64Gi"
+        nvidia.com/pgpu: 1
   cpu:
     image: opea/vllm-cpu-ubi:v0.12.0-ubi9
     katacontainers:

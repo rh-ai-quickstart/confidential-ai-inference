@@ -17,9 +17,10 @@ spec:
         app: vllm
         component: vllm
       annotations:
-        {{- with (index .Values.deploymentConfigs .Values.device).katacontainers.runtimeClassName }}
+        io.katacontainers.config.hypervisor.default_memory: "131072"
+        io.katacontainers.config.hypervisor.kernel_params: "agent.guest_components_rest_api=all"
+        io.katacontainers.config.hypervisor.cc_init_data: H4sIAAAAAAAAA7WVzY7TMBCA73mKKJeemu1qEawq7WFpC6xEaZR06WFVVVNnmlh1PMGelIanx6FiBQgne4BDDp75PP/jnNBYSTq8C6NJfB1PogBUQUZyWXUyW8LN7asoCJ5yYNgGEUDMVKnIKUejUfDEdES9E6QPsrCxIEE7sNugMaq7XjLX06ur496OLZqTFDhm01hGHFONBpjM2LbuXMVQ1zbm/DzOsaK4vJ5MpjeTN69voz99OGP/1n6XRxCJvPw9s+NebAMNFXaOhNi5c/Qf/NakpGhjgwX9dF2DOEKBofs07y5AEOR4gEZxeJ/n92nyCWVR7snYFL80aDmc3oUuBPwVy75C7VPPFFnMOJfaS1DdvpMKvXqDwDgjzSA1mn4sA53v6eyD5k5oqB2g3iMvkY0U3qQdsVotFydXNy/SSefoglZeMx+l5QfNaA4gsJdKqWE/scTqA3GtmuJtmxjae2u50srVcJY8uhs+JoHGDpc7aZR6qNzk+IAUIc/YNcXrKHWDehr2dMEyBoWfpWFJB5uVYHBJjWZvSVK0iHnqGk3VHE89WFMNx5AhX/rpRmwtK2/Sjkt+rJEXkIUG5Xrk+u2N3eVqeDimjlobEFIXPQzbF1iiesDQmttNt8JWfvMm/1jnL1nUC7aoS6zcC6b623iBn3ekH+tfkg1IHij8xv2P8O9D+8wszig8Zro39TtNHtll6AYAAA==
         io.katacontainers.config.runtime.create_container_timeout: '1800'
-        {{- end }}
     spec:
       serviceAccountName: {{ .Values.sa }}
       restartPolicy: Always
@@ -39,6 +40,12 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       initContainers:
+        - name: init-attestation
+          image: storytel/alpine-bash-curl:latest
+          command: [ "/bin/sh","-c" ]
+          args:
+            - echo starting;
+              (curl http://127.0.0.1:8006/aa/token\?token_type\=kbs | grep -iv "get token failed" | grep -iv "error" | grep -i token && echo "ATTESTATION COMPLETED SUCCESSFULLY") || (echo "ATTESTATION FAILED" && exit 1);
         - name: download-model
           image: {{ (index .Values.deploymentConfigs .Values.device).image }}
           imagePullPolicy: IfNotPresent
