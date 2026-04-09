@@ -9,15 +9,17 @@ Deploy confidential containers with Intel® Trust Domain Extensions (Intel® TDX
   - [Architecture diagrams](#architecture-diagrams)
 - [Requirements](#requirements)
   - [Minimum hardware requirements](#minimum-hardware-requirements)
+  - [BIOS Configuration](#bios-configuration)
+  - [OS and GPU Passthrough Configuration](#os-and-gpu-passthrough-configuration)
   - [Minimum software requirements](#minimum-software-requirements)
-  - [Required user permissions](#required-user-permissions)
+  - [Additional](#additional)
 - [Deploy](#deploy)
   - [Clone the repository](#clone-the-repository)
   - [Create the project](#create-the-project)
+  - [Create the security permissions](#create-the-security-permissions)
   - [Build and deploy the helm chart](#build-and-deploy-the-helm-chart)
 - [Test](#test)
 - [Delete](#delete)
-- [References](#references)
 
 
 ## Detailed description
