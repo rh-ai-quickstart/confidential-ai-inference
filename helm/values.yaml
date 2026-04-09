@@ -36,7 +36,7 @@ deploymentConfigs:
       count: 0
     nodeSelector: {}
     env:
-      VLLM_CPU_KVCACHE_SPACE: "40"
+      VLLM_CPU_KVCACHE_SPACE: "10"
       VLLM_RPC_TIMEOUT: "100000"
       VLLM_ALLOW_LONG_MAX_MODEL_LEN: "1"
       VLLM_ENGINE_ITERATION_TIMEOUT_S: "120"
@@ -44,39 +44,41 @@ deploymentConfigs:
       HF_HUB_DISABLE_XET: "1"
     resources:
       limits:
-        cpu: "64"
-        memory: "80Gi"
-      requests:
         cpu: "32"
-        memory: "64Gi"
+        memory: "48Gi"
+      requests:
+        cpu: "16"
+        memory: "32Gi"
     
 
 # Model configuration
 model:
-  # repo: "RedHatAI/Llama-4-Scout-17B-16E-Instruct-quantized.w4a16"  # HuggingFace repo to download
-  # localDir: "Llama-4-Scout-17B-16E-Instruct-quantized"             # Local directory name under /models-cache
-  # servedName: "Llama-4-Scout-17B-16E-Instruct-quantized"           # Name exposed by vLLM API
-  # toolCallParser: "llama4_pythonic"
-  repo: "meta-llama/Meta-Llama-3.1-8B-Instruct"  # HuggingFace repo to download
-  localDir: "Meta-Llama-3.1-8B-Instruct"         # Local directory name under /models-cache
-  servedName: "Meta-Llama-3.1-8B-Instruct"       # Name exposed by vLLM API
-  toolCallParser: "llama3_json"
   gpu:
-    - --max-model-len=32000
-    - --gpu-memory-utilization=0.90
-    - --enable-chunked-prefill
-    - --enable_prefix_caching
-    - --enforce-eager
-    - --tensor-parallel-size=1
+    repo: "RedHatAI/Llama-4-Scout-17B-16E-Instruct-quantized.w4a16"  # HuggingFace repo to download
+    localDir: "Llama-4-Scout-17B-16E-Instruct-quantized"             # Local directory name under /models-cache
+    servedName: "Llama-4-Scout-17B-16E-Instruct-quantized"           # Name exposed by vLLM API
+    toolCallParser: "llama4_pythonic"
+    args:
+      - --max-model-len=32000
+      - --gpu-memory-utilization=0.90
+      - --enable-chunked-prefill
+      - --enable_prefix_caching
+      - --enforce-eager
+      - --tensor-parallel-size=1
   cpu:
-    - --block-size=128
-    - --dtype=bfloat16
-    - --max-model-len=8192
-    - --distributed-executor-backend=mp
-    - --max-num-batched-tokens=8192
-    - --max-num-seqs=256
-    - --tensor-parallel-size=1
-    - --pipeline-parallel-size=1
+    repo: "meta-llama/Llama-3.1-8B-Instruct"  # HuggingFace repo to download
+    localDir: "Llama-3.1-8B-Instruct"         # Local directory name under /models-cache
+    servedName: "Llama-3.1-8B-Instruct"       # Name exposed by vLLM API
+    toolCallParser: "llama3_json"
+    args:
+      - --block-size=128
+      - --dtype=bfloat16
+      - --max-model-len=8192
+      - --distributed-executor-backend=mp
+      - --max-num-batched-tokens=8192
+      - --max-num-seqs=256
+      - --tensor-parallel-size=1
+      - --pipeline-parallel-size=1
 
 # Secret configuration
 hfToken: ""

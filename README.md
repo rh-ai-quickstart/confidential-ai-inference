@@ -47,25 +47,60 @@ Confidential containers secure workloads with a seamless attestation and key rel
 
 ### Minimum hardware requirements 
 
-- 8+ vCPUs, 4th Gen Intel® Xeon® Scalable Processors or newer
-- 24+ GiB RAM
+- 32+ vCPUs, 5th Gen Intel® Xeon® Scalable Processors or newer
+- 64+ GiB RAM
+- 
 
 **Optional, depending on selected hardware platform**
-- 1 GPU (NVIDIA H100, H200, B200, or equivalent)
+- 1 GPU (NVIDIA H100, H200, B200, or equivalent) with 80GiB RAM
+
+### BIOS Configuration
+Intel® TDX must be enabled in BIOS before deployment. Follow this [guide](https://cc-enabling.trustedservices.intel.com/intel-tdx-enabling-guide/04/hardware_setup/) to set the BIOS configurations depending on the CPU.
+
+### OS and GPU Passthrough Configuration
+To enable TDX in the host OS, set the following kernel boot parameters:
+- `nohibernate` disables system hibernation, which is required because TDX memory encryption keys are tied to the running instance and cnanot be safely restored from a hibernation snapshot.
+- `kvm_intel.tdx` enables TDX support in the KVM Intel kernel module.
+
+Command:
+```bash
+sudo rpm-ostree kargs --append="nohibernate" --append="kvm_intel.tdx=1"
+```
+
+**Important:** to run TDX with a GPU, GPU passthrough must be enabled:
+```bash
+sudo rpm-ostree kargs --append="intel_iommu=on" --append="iommu=pt"
+```
+
+Reboot the machine:
+```bash
+sudo systemctl reboot
+```
+
+Check updated kernel boot parameters are present:
+```bash
+cat /proc/cmdline
+```
+
+Verify the TDX module is initialized:
+```bash
+sudo dmesg | grep -i tdx
+```
+Look for "BIOS enabled" and "module initialized".
 
 ### Minimum software requirements
 
-- Red Hat OpenShift 4.20.6+
+- Red Hat OpenShift 4.21+
 - Red Hat OpenShift AI 2.25+
 - OpenShift CLI (`oc`) - [Download here](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html)
 - Helm CLI (`helm`) - [Download here](https://helm.sh/docs/intro/install/)
 
 Install the following from **OperatorHub/Software Catalog** on the OpenShift console. This is a one-time setup.
 
-#### 1. OpenShift Sandboxed Containers Operator
+#### 1. OpenShift Sandboxed Containers Operator <version>
 This is required to run Kata Containers, which are used to run Intel TDX-protected VMs (Trusted Domains).
 
-#### 2. Node Feature Discovery (NFD)
+#### 2. Node Feature Discovery (NFD) <version>
 - Install **Node Feature Discovery Operator** from OperatorHub/Software Catalog into `openshift-nfd`
 - Go to **NFD → Create NodeFeatureDiscovery → Accept defaults → Create**
 - Verify:
@@ -74,7 +109,7 @@ oc get pods -n openshift-nfd
 # Should show nfd-controller-manager, nfd-master, nfd-worker all Running
 ```
 
-#### 3. NVIDIA GPU Operator (GPU only)
+#### 3. NVIDIA GPU Operator <version> (GPU only) 
 - Install **NVIDIA GPU Operator** from OperatorHub/Software Catalog into `nvidia-gpu-operator`
 - Go to **NVIDIA GPU Operator → Create ClusterPolicy → Accept defaults → Create**
 - Wait 10-20 minutes for driver compilation, then verify:
@@ -85,7 +120,7 @@ oc describe node $(oc get nodes -o jsonpath='{.items[0].metadata.name}') | grep 
 # Should show nvidia.com/gpu: 1
 ```
 
-#### 4. LVM Storage
+#### 4. LVM Storage <version>
 - Install a blank secondary disk. Wipe it empty and acquire the persistent path i.e. /dev/disk/by-path/pci-xxxx:xx:xx.x-nvme-x
 - Install **LVM Storage** from OperatorHub/Software Catalog into `openshift-storage`
 - Go to **LVM Storage → Create LVMCluster → storage → deviceClasses → deviceSelector → paths**
@@ -102,7 +137,9 @@ oc describe node $(oc get nodes -o jsonpath='{.items[0].metadata.name}') | grep 
 
 ## Deploy
 
-This AI Quickstart will deploy the [RedHatAI/Llama-4-Scout-17B-16E-Instruct-quantized.w4a16](https://huggingface.co/RedHatAI/Llama-4-Scout-17B-16E-Instruct-quantized.w4a16) model with vLLM, but secured using confidential containers powered by Intel® TDX. This model was obtained by quantizing weights of [Llama-4-Scout-17B-16E-Instruct](https://huggingface.co/meta-llama/Llama-4-Scout-17B-16E-Instruct) to INT4, reducing memory and disk size requirements by approximately 75%.
+This AI Quickstart will deploy one of two models depending on the hardware platform. vLLM is used for model serving but it is secured using confidential containers powered by Intel® TDX. 
+- **For GPU:** [RedHatAI/Llama-4-Scout-17B-16E-Instruct-quantized.w4a16](https://huggingface.co/RedHatAI/Llama-4-Scout-17B-16E-Instruct-quantized.w4a16). This model was obtained by quantizing weights of [Llama-4-Scout-17B-16E-Instruct](https://huggingface.co/meta-llama/Llama-4-Scout-17B-16E-Instruct) to INT4, reducing memory and disk size requirements by approximately 75%.
+- **For CPU:** [meta-llama/Llama-3.1-8B-Instruct](https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct). This small model runs optimally on CPU.
 
 ### Clone the repository
 
