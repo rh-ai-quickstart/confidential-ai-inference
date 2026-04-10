@@ -50,7 +50,6 @@ deploymentConfigs:
       requests:
         cpu: "64"
         memory: "80Gi"
-    
 
 # Model configuration
 model:

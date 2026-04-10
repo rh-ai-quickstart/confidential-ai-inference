@@ -27,7 +27,7 @@ spec:
       schedulerName: default-scheduler
       enableServiceLinks: true
       preemptionPolicy: PreemptLowerPriority
-      terminationGracePeriodSeconds: 30
+      terminationGracePeriodSeconds: 60
       {{- with (index .Values.deploymentConfigs .Values.device).katacontainers.runtimeClassName }}
       runtimeClassName: {{ . }}
       {{- end }}
@@ -83,6 +83,10 @@ spec:
         - name: server
           image: {{ (index .Values.deploymentConfigs .Values.device).image }}
           imagePullPolicy: IfNotPresent
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 15"]
           command:
             - /bin/bash
             - -c
