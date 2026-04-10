@@ -17,10 +17,10 @@ spec:
         app: vllm
         component: vllm
       annotations:
-        io.katacontainers.config.hypervisor.default_memory: "131072"
+        io.katacontainers.config.hypervisor.default_memory: {{ (index .Values.deploymentConfigs .Values.device).katacontainers.memory | quote }}
         io.katacontainers.config.hypervisor.kernel_params: "agent.guest_components_rest_api=all"
         io.katacontainers.config.hypervisor.cc_init_data: H4sIAAAAAAAAA7WVzY7TMBCA73mKKJeemu1qEawq7WFpC6xEaZR06WFVVVNnmlh1PMGelIanx6FiBQgne4BDDp75PP/jnNBYSTq8C6NJfB1PogBUQUZyWXUyW8LN7asoCJ5yYNgGEUDMVKnIKUejUfDEdES9E6QPsrCxIEE7sNugMaq7XjLX06ur496OLZqTFDhm01hGHFONBpjM2LbuXMVQ1zbm/DzOsaK4vJ5MpjeTN69voz99OGP/1n6XRxCJvPw9s+NebAMNFXaOhNi5c/Qf/NakpGhjgwX9dF2DOEKBofs07y5AEOR4gEZxeJ/n92nyCWVR7snYFL80aDmc3oUuBPwVy75C7VPPFFnMOJfaS1DdvpMKvXqDwDgjzSA1mn4sA53v6eyD5k5oqB2g3iMvkY0U3qQdsVotFydXNy/SSefoglZeMx+l5QfNaA4gsJdKqWE/scTqA3GtmuJtmxjae2u50srVcJY8uhs+JoHGDpc7aZR6qNzk+IAUIc/YNcXrKHWDehr2dMEyBoWfpWFJB5uVYHBJjWZvSVK0iHnqGk3VHE89WFMNx5AhX/rpRmwtK2/Sjkt+rJEXkIUG5Xrk+u2N3eVqeDimjlobEFIXPQzbF1iiesDQmttNt8JWfvMm/1jnL1nUC7aoS6zcC6b623iBn3ekH+tfkg1IHij8xv2P8O9D+8wszig8Zro39TtNHtll6AYAAA==
-        io.katacontainers.config.runtime.create_container_timeout: '1800'
+        io.katacontainers.config.runtime.create_container_timeout: '3600'
     spec:
       serviceAccountName: {{ .Values.sa }}
       restartPolicy: Always
@@ -163,7 +163,7 @@ spec:
             timeoutSeconds: 1
             periodSeconds: 30
             successThreshold: 1
-            failureThreshold: 80
+            failureThreshold: 120
           volumeMounts:
             - name: shm
               mountPath: /dev/shm
