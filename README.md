@@ -49,9 +49,8 @@ Confidential containers secure workloads with a seamless attestation and key rel
 
 ### Minimum hardware requirements 
 
-- 32+ vCPUs, 5th Gen Intel® Xeon® Scalable Processors or newer
-- 64+ GiB RAM
-- 
+- 16+ vCPUs if running model with GPU, 64+ vCPUs if running model with CPU, 5th Gen Intel® Xeon® Scalable Processors or newer
+- 64+ GiB RAM if running model with GPU, 80+ GiB RAM if running model with CPU
 
 **Optional, depending on selected hardware platform**
 - 1 GPU (NVIDIA H100, H200, B200, or equivalent) with 80GiB RAM
@@ -87,8 +86,12 @@ cat /proc/cmdline
 Verify the TDX module is initialized:
 ```bash
 sudo dmesg | grep -i tdx
+
+# Look for the following output:
+# virt/tdx: BIOS enabled
+# ...
+# virt/tdx: module initialized
 ```
-Look for "BIOS enabled" and "module initialized".
 
 ### Minimum software requirements
 

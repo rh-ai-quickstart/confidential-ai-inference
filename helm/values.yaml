@@ -31,24 +31,25 @@ deploymentConfigs:
     katacontainers:
       resourceName: ""
       runtimeClassName: "kata-cc"
-      memory: "32768"
-      vcpus: "32"
+      memory: "131072"
+      vcpus: "64"
       count: 0
     nodeSelector: {}
     env:
-      VLLM_CPU_KVCACHE_SPACE: "10"
+      VLLM_CPU_KVCACHE_SPACE: "40"
       VLLM_RPC_TIMEOUT: "100000"
       VLLM_ALLOW_LONG_MAX_MODEL_LEN: "1"
       VLLM_ENGINE_ITERATION_TIMEOUT_S: "120"
+      VLLM_CPU_NUM_OF_RESERVED_CPU: "0"
       VLLM_CPU_SGL_KERNEL: "1"
       HF_HUB_DISABLE_XET: "1"
     resources:
       limits:
-        cpu: "32"
-        memory: "48Gi"
+        cpu: "64"
+        memory: "80Gi"
       requests:
-        cpu: "16"
-        memory: "32Gi"
+        cpu: "64"
+        memory: "80Gi"
     
 
 # Model configuration
@@ -75,8 +76,8 @@ model:
       - --dtype=bfloat16
       - --max-model-len=8192
       - --distributed-executor-backend=mp
-      - --max-num-batched-tokens=8192
-      - --max-num-seqs=256
+      - --max-num-batched-tokens=4096
+      - --max-num-seqs=16
       - --tensor-parallel-size=1
       - --pipeline-parallel-size=1
 
