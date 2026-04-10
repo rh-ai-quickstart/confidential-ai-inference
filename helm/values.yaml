@@ -32,6 +32,7 @@ deploymentConfigs:
     katacontainers:
       resourceName: ""
       runtimeClassName: "kata-cc"
+      memory: "131072"
       vcpus: "64"
       count: 0
     nodeSelector: {}
