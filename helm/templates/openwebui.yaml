@@ -39,6 +39,53 @@ spec:
         env:
         - name: OPENAI_API_BASE_URL
           value: "http://vllm-{{ .Values.device }}-service.{{ .Release.Namespace }}.svc.cluster.local:8080/v1"
+        # Disable features not needed for confidential transaction processing
+        - name: ENABLE_RAG_WEB_SEARCH
+          value: "false"
+        - name: RAG_EMBEDDING_ENGINE
+          value: ""
+        - name: ENABLE_COMMUNITY_SHARING
+          value: "false"
+        - name: ENABLE_MESSAGE_RATING
+          value: "false"
+        # Enable file uploads so users can attach CSV files in the chat
+        - name: ENABLE_UPLOADS
+          value: "true"
+        # Allow large CSV files (credit card transaction datasets)
+        - name: MAX_UPLOAD_SIZE
+          value: {{ .Values.creditCardProcessor.maxUploadSizeBytes | quote }}
+        # Restrict upload types to CSV and common document formats
+        - name: ALLOWED_UPLOAD_EXTENSIONS
+          value: {{ .Values.creditCardProcessor.allowedUploadExtensions | quote }}
+        # Extract text content from uploaded files and include in the message sent to vLLM
+        # This ensures CSV content is sent directly to the model inside the TDX-protected kata VM
+        - name: RAG_TEXT_SPLITTER
+          value: "character"
+        - name: CONTENT_EXTRACTION_ENGINE
+          value: "default"
+        - name: ENABLE_RAG_LOCAL_WEB_FETCH
+          value: "false"
+        # Send full file content inline with the chat message (not as RAG chunks)
+        - name: FILE_MAX_SIZE
+          value: {{ .Values.creditCardProcessor.maxUploadSizeBytes | quote }}
+        - name: FILE_UPLOAD_DIR
+          value: "/app/backend/data/uploads"
+        # System prompt pre-loaded for credit card fraud analysis context
+        - name: DEFAULT_SYSTEM_PROMPT
+          value: |
+            You are a financial security analyst operating inside a confidential computing environment protected by Intel® TDX.
+            All credit card transaction data you process is encrypted in memory inside a hardware-isolated Trust Domain (TD).
+            The host OS, hypervisor, and cluster administrators cannot access this data at any point.
+            When a CSV file is uploaded, its contents are sent directly to you inside the encrypted Trust Domain — the data never touches host storage.
+            Analyse each transaction row for: fraud indicators, unusual patterns, high-risk merchant categories, and geographic anomalies.
+            For each transaction respond with a structured entry containing:
+              - transaction_id
+              - risk_level: low | medium | high
+              - flags: list of specific concerns
+              - category: merchant category
+              - summary: one sentence
+            Never output raw card numbers. Refer to cards by their last 4 digits only.
+            At the end, provide an overall summary with total transactions, count per risk level, and top flags.
         tty: true
         securityContext:
           runAsUser: 0

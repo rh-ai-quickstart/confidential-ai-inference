@@ -28,7 +28,7 @@ deploymentConfigs:
         memory: "64Gi"
         nvidia.com/pgpu: 1
   cpu:
-    image: opea/vllm-cpu-ubi:v0.12.0-ubi9
+    image: quay.io/vllm/automation-vllm:0.18.0rc1.dev7_rhaiv.0.ge974742fb.cpu
     katacontainers:
       resourceName: ""
       runtimeClassName: "kata-cc"
@@ -96,3 +96,8 @@ modelCache:
 openWebUI:
   storageSize: "2Gi"
   keepOnUninstall: false    # false = PVC deleted on helm uninstall
+
+# Credit card transaction processor configuration
+creditCardProcessor:
+  maxUploadSizeBytes: "104857600"  # 100 MB max CSV upload size in Open WebUI
+  allowedUploadExtensions: "csv,txt,json,pdf"

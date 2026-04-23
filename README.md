@@ -100,13 +100,10 @@ sudo dmesg | grep -i tdx
 - OpenShift CLI (`oc`) - [Download here](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html)
 - Helm CLI (`helm`) - [Download here](https://helm.sh/docs/intro/install/)
 
-Install the following from **OperatorHub/Software Catalog** on the OpenShift console. This is a one-time setup.
+Install the following from **Ecosystem->Software Catalog** on the OpenShift console. This is a one-time setup.
 
-#### 1. OpenShift Sandboxed Containers Operator v1.12.0+
-This is required to run Kata Containers, which are used to run Intel TDX-protected VMs (Trusted Domains).
-
-#### 2. Node Feature Discovery (NFD) v4.21+
-- Install **Node Feature Discovery Operator** from OperatorHub/Software Catalog into `openshift-nfd`
+#### 1. Node Feature Discovery (NFD) v4.21+
+- Install **Node Feature Discovery Operator** from Ecosystem->Software Catalog into `openshift-nfd`
 - Go to **NFD → Create NodeFeatureDiscovery → Accept defaults → Create**
 - Verify:
 ```bash
@@ -114,8 +111,8 @@ oc get pods -n openshift-nfd
 # Should show nfd-controller-manager, nfd-master, nfd-worker all Running
 ```
 
-#### 3. NVIDIA GPU Operator v26.3.0+ (GPU only) 
-- Install **NVIDIA GPU Operator** from OperatorHub/Software Catalog into `nvidia-gpu-operator`
+#### 2. NVIDIA GPU Operator v26.3.0+ (GPU only) 
+- Install **NVIDIA GPU Operator** from Ecosystem->Software Catalog into `nvidia-gpu-operator`
 - Go to **NVIDIA GPU Operator → Create ClusterPolicy → Accept defaults → Create**
 - Wait 10-20 minutes for driver compilation, then verify:
 ```bash
@@ -125,9 +122,21 @@ oc describe node $(oc get nodes -o jsonpath='{.items[0].metadata.name}') | grep 
 # Should show nvidia.com/gpu: 1
 ```
 
-#### 4. LVM Storage v4.19+
+#### 3. OpenShift Sandboxed Containers Operator v1.12.0+
+This is required to run Kata Containers, which are used to run Intel TDX-protected VMs (Trusted Domains).
+- Install **OpenShift sandboxed containers Operator** from Ecosystem->Software Catalog
+- Go to **OpenShift sandboxed containers Operator → KataConfig → Create KataConfig**. Use any name.
+- Wait until the KataConfig is ready, then verify *kata-cc* and *kata-cc-nvidia-gpu* (if running with GPU) runtimeClasses are present:
+```bash
+oc get runtimeClasses
+```
+
+#### 4. Red Hat Build of Trustee v1.1.0+
+This is required for TDX attestation for confidential containers.
+
+#### 5. LVM Storage v4.19+
 - Install a blank secondary disk. Wipe it empty and acquire the persistent path i.e. /dev/disk/by-path/pci-xxxx:xx:xx.x-nvme-x
-- Install **LVM Storage** from OperatorHub/Software Catalog into `openshift-storage`
+- Install **LVM Storage** from Ecosystem->Software Catalog into `openshift-storage`
 - Go to **LVM Storage → Create LVMCluster → storage → deviceClasses → deviceSelector → paths**
 - Add the path to the secondary disk.
 - Press "Create".
