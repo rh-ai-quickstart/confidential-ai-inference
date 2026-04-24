@@ -74,8 +74,9 @@
 
   <!-- Model -->
   <rect x="445" y="268" width="175" height="55" rx="6" fill="white" stroke="#6c8ebf" stroke-width="1.5"/>
-  <text x="532" y="291" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">Model Weights</text>
-  <text x="532" y="308" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">Llama-4-Scout w4a16</text>
+  <text x="532" y="288" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">Model Weights</text>
+  <text x="532" y="302" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">GPU: Llama-4-Scout w4a16</text>
+  <text x="532" y="315" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">CPU: Llama-3.1-8B-Instruct</text>
 
   <!-- Encrypted memory bar -->
   <rect x="230" y="352" width="540" height="42" rx="6" fill="#f8cecc" stroke="#b85450" stroke-width="1.5"/>
@@ -117,7 +118,7 @@
   <!-- Intel Xeon (bottom sub-box) -->
   <rect x="843" y="186" width="194" height="72" rx="6" fill="white" stroke="#6c8ebf" stroke-width="1.5"/>
   <text x="940" y="204" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">Intel® Xeon Scalable</text>
-  <text x="940" y="219" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">4th Gen+ · TDX enabled in BIOS</text>
+  <text x="940" y="219" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">5th Gen+ · TDX enabled in BIOS</text>
   <text x="940" y="234" font-family="Arial" font-size="8" fill="#888" text-anchor="middle">Provides TDX Trust Domain</text>
   <text x="940" y="247" font-family="Arial" font-size="8" fill="#888" text-anchor="middle">hardware isolation + encryption</text>
 
@@ -137,8 +138,8 @@
 
   <rect x="843" y="319" width="194" height="48" rx="5" fill="white" stroke="#d6b656" stroke-width="1.2"/>
   <text x="940" y="337" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">RuntimeClass</text>
-  <text x="940" y="352" font-family="Arial" font-size="8" fill="#555" text-anchor="middle">kata-qemu-nvidia-gpu-tdx (GPU + TDX)</text>
-  <text x="940" y="363" font-family="Arial" font-size="8" fill="#555" text-anchor="middle">kata-qemu-tdx (CPU + TDX)</text>
+  <text x="940" y="352" font-family="Arial" font-size="8" fill="#555" text-anchor="middle">kata-cc-nvidia-gpu (GPU + TDX)</text>
+  <text x="940" y="363" font-family="Arial" font-size="8" fill="#555" text-anchor="middle">kata-cc (CPU + TDX)</text>
 
   <rect x="843" y="375" width="194" height="38" rx="5" fill="white" stroke="#d6b656" stroke-width="1.2"/>
   <text x="940" y="391" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">Kata Deploy DaemonSet</text>
@@ -153,28 +154,34 @@
   <text x="622" y="628" font-family="Arial" font-size="10" font-weight="bold" fill="#666" text-anchor="middle">Cluster Operators (one-time setup)</text>
 
   <!-- NFD Operator -->
-  <rect x="212" y="635" width="193" height="62" rx="8" fill="#d5e8d4" stroke="#82b366" stroke-width="1.8"/>
-  <text x="308" y="656" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">Node Feature Discovery</text>
-  <text x="308" y="671" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">NFD Operator — openshift-nfd</text>
-  <text x="308" y="685" font-family="Arial" font-size="8" fill="#888" text-anchor="middle">Detects hardware features, labels nodes</text>
+  <rect x="212" y="635" width="158" height="62" rx="8" fill="#d5e8d4" stroke="#82b366" stroke-width="1.8"/>
+  <text x="291" y="656" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">Node Feature Discovery</text>
+  <text x="291" y="671" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">NFD Operator — openshift-nfd</text>
+  <text x="291" y="685" font-family="Arial" font-size="8" fill="#888" text-anchor="middle">Detects hardware features, labels nodes</text>
 
   <!-- NVIDIA GPU Operator -->
-  <rect x="414" y="635" width="193" height="62" rx="8" fill="#ffe6cc" stroke="#d6b656" stroke-width="1.8"/>
-  <text x="510" y="656" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">NVIDIA GPU Operator</text>
-  <text x="510" y="671" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">nvidia-gpu-operator</text>
-  <text x="510" y="685" font-family="Arial" font-size="8" fill="#888" text-anchor="middle">Driver, toolkit, device plugin</text>
+  <rect x="378" y="635" width="158" height="62" rx="8" fill="#ffe6cc" stroke="#d6b656" stroke-width="1.8"/>
+  <text x="457" y="656" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">NVIDIA GPU Operator</text>
+  <text x="457" y="671" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">nvidia-gpu-operator</text>
+  <text x="457" y="685" font-family="Arial" font-size="8" fill="#888" text-anchor="middle">Driver, toolkit, device plugin</text>
 
   <!-- Sandboxed Containers Operator -->
-  <rect x="616" y="635" width="207" height="62" rx="8" fill="#f8cecc" stroke="#b85450" stroke-width="1.8"/>
-  <text x="719" y="656" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">Sandboxed Containers</text>
-  <text x="719" y="671" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">OpenShift Sandboxed Containers</text>
-  <text x="719" y="685" font-family="Arial" font-size="8" fill="#888" text-anchor="middle">Kata shim installation</text>
+  <rect x="544" y="635" width="158" height="62" rx="8" fill="#f8cecc" stroke="#b85450" stroke-width="1.8"/>
+  <text x="623" y="656" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">Sandboxed Containers</text>
+  <text x="623" y="671" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">OpenShift Sandboxed Containers</text>
+  <text x="623" y="685" font-family="Arial" font-size="8" fill="#888" text-anchor="middle">Kata shim installation</text>
 
-  <!-- RHOAI Operator -->
-  <rect x="832" y="635" width="200" height="62" rx="8" fill="#eaf3fb" stroke="#6c8ebf" stroke-width="1.8"/>
-  <text x="932" y="656" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">Red Hat OpenShift AI</text>
-  <text x="932" y="671" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">RHOAI Operator</text>
-  <text x="932" y="685" font-family="Arial" font-size="8" fill="#888" text-anchor="middle">Model serving, pipelines</text>
+  <!-- Trustee Operator -->
+  <rect x="710" y="635" width="158" height="62" rx="8" fill="#f3eef8" stroke="#9673a6" stroke-width="1.8"/>
+  <text x="789" y="656" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">Red Hat Build of Trustee</text>
+  <text x="789" y="671" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">Trustee Operator</text>
+  <text x="789" y="685" font-family="Arial" font-size="8" fill="#888" text-anchor="middle">TDX attestation &amp; key release</text>
+
+  <!-- LVM Storage Operator -->
+  <rect x="876" y="635" width="158" height="62" rx="8" fill="#eaf3fb" stroke="#6c8ebf" stroke-width="1.8"/>
+  <text x="955" y="656" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">LVM Storage</text>
+  <text x="955" y="671" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">openshift-storage</text>
+  <text x="955" y="685" font-family="Arial" font-size="8" fill="#888" text-anchor="middle">PVC provisioning</text>
 
   <!-- ── User (outside cluster) ── -->
   <rect x="20" y="108" width="130" height="65" rx="8" fill="#dae8fc" stroke="#6c8ebf" stroke-width="2"/>
@@ -186,22 +193,13 @@
   <path d="M 150 140 L 215 140" stroke="#555" stroke-width="1.8" fill="none" marker-end="url(#arr)"/>
   <text x="182" y="133" font-family="Arial" font-size="8" fill="#555" text-anchor="middle">TLS</text>
 
-  <!-- ── Model Cache PVC (outside cluster) ── -->
-  <rect x="20" y="270" width="130" height="70" rx="8" fill="#e1d5e7" stroke="#9673a6" stroke-width="2"/>
-  <text x="85" y="293" font-family="Arial" font-size="11" font-weight="bold" fill="#1a1a2e" text-anchor="middle">Model Cache</text>
-  <text x="85" y="310" font-family="Arial" font-size="10" fill="#1a1a2e" text-anchor="middle">PVC  64Gi</text>
-  <text x="85" y="326" font-family="Arial" font-size="9" fill="#888" text-anchor="middle">models-cache-pvc</text>
-
-  <!-- PVC → Kata -->
-  <path d="M 150 305 L 215 305" stroke="#9673a6" stroke-width="1.5" fill="none" stroke-dasharray="5 3" marker-end="url(#arr-purple)"/>
-
   <!-- ── HuggingFace (outside cluster) ── -->
-  <rect x="20" y="385" width="130" height="70" rx="8" fill="#fff9e6" stroke="#d6b656" stroke-width="2"/>
-  <text x="85" y="408" font-family="Arial" font-size="11" font-weight="bold" fill="#1a1a2e" text-anchor="middle">HuggingFace</text>
-  <text x="85" y="425" font-family="Arial" font-size="10" fill="#555" text-anchor="middle">Model Download</text>
-  <text x="85" y="441" font-family="Arial" font-size="9" fill="#888" text-anchor="middle">init container</text>
+  <rect x="20" y="270" width="130" height="70" rx="8" fill="#fff9e6" stroke="#d6b656" stroke-width="2"/>
+  <text x="85" y="293" font-family="Arial" font-size="11" font-weight="bold" fill="#1a1a2e" text-anchor="middle">HuggingFace</text>
+  <text x="85" y="310" font-family="Arial" font-size="10" fill="#555" text-anchor="middle">Model Download</text>
+  <text x="85" y="326" font-family="Arial" font-size="9" fill="#888" text-anchor="middle">init container · emptyDir</text>
 
-  <!-- HuggingFace → PVC -->
-  <path d="M 85 385 L 85 340" stroke="#d6b656" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+  <!-- HuggingFace → Kata (emptyDir) -->
+  <path d="M 150 305 L 215 305" stroke="#d6b656" stroke-width="1.5" fill="none" stroke-dasharray="5 3" marker-end="url(#arr)"/>
 
 </svg>
