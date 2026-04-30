@@ -53,35 +53,68 @@ Confidential containers secure workloads with a seamless attestation and key rel
 - 64+ GiB RAM if running model with GPU, 80+ GiB RAM if running model with CPU
 
 **Optional, depending on selected hardware platform**
-- 1 GPU (NVIDIA H100, H200, B200, or equivalent) with 80GiB RAM
+- 1 NVIDIA H100 GPU with 80GiB RAM
 
-### BIOS Configuration
+### Minimum software requirements
+
+- Red Hat OpenShift 4.21.9+
+- Red Hat OpenShift AI 3.4+
+- OpenShift CLI (`oc`) - [Download here](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html)
+- Helm CLI (`helm`) - [Download here](https://helm.sh/docs/intro/install/)
+
+### TDX and Confidential Containers Setup
+
+#### BIOS Configuration
 Intel® TDX must be enabled in BIOS before deployment. Follow this [guide](https://cc-enabling.trustedservices.intel.com/intel-tdx-enabling-guide/04/hardware_setup/) to set the BIOS configurations depending on the CPU.
 
-### OS and GPU Passthrough Configuration
-To enable TDX in the host OS, set the following kernel boot parameters:
+To support Intel remote attestation and provision required platform manifests, the `SGX Factory Reset` BIOS knob must be set to `Enabled`.
+
+#### MachineConfig Setup
+
+##### Create MachineConfig for Intel® TDX 
+A `MachineConfig` object is needed to configure the required kernel parameters and modules on the cluster nodes. [Reference](https://docs.redhat.com/en/documentation/openshift_sandboxed_containers/1.12/html-single/deploying_confidential_containers_on_bare-metal_servers/index#creating-tdx-machineconfig_metal-cc)
+
+Kernel boot parameters to be applied:
 - `nohibernate` disables system hibernation, which is required because TDX memory encryption keys are tied to the running instance and cnanot be safely restored from a hibernation snapshot.
 - `kvm_intel.tdx` enables TDX support in the KVM Intel kernel module.
 
-Command:
+By default, `role` is set to `master` because it assumes a single-node cluster is used. Change to `kata-oc` for a multi-node cluster. Then create the config map:
 ```bash
-sudo rpm-ostree kargs --append="nohibernate" --append="kvm_intel.tdx=1"
+oc create -f helm/tdx-setup/tdx-machine-config.yaml
 ```
 
-**Important:** to run TDX with a GPU, GPU passthrough must be enabled:
+The node will automatically reboot.
+
+##### Create MachineConfig for NVIDIA GPUs (GPU only)
+If running with a GPU, a `MachineConfig` is also needed to enable the Input-Output Memory Management Unit (IOMMU) to support GPU passthrough. [Reference](https://docs.redhat.com/en/documentation/openshift_sandboxed_containers/1.12/html-single/deploying_confidential_containers_on_bare-metal_servers/index#create-gpu-machineconfig_metal-cc)
+
+Kernel boot parameters to be applied:
+- `intel_iommu_on` enables the IOMMU
+- `iommu` configures the IOMMU for GPU passthrough
+
+By default, `role` is set to `master` because it assumes a single-node cluster is used. Change to `worker` for a multi-node cluster. Then create the config map:
 ```bash
-sudo rpm-ostree kargs --append="intel_iommu=on" --append="iommu=pt"
+oc create -f helm/tdx-setup/gpu-machine-config.yaml
 ```
 
-Reboot the machine:
+The node will automatically reboot.
+
+>**Note:** It is possible to apply both MachineConfigs before reboot. The MachineConfigPool for the target pool (`master`, `worker`, `kata-oc`) can be paused by setting `spec.paused` to `true`, apply the MachineConfigs, then set `spec-paused` back to `false`.
+
+##### Check MachineConfigs and Kernel Boot Parameters
+Check the MachineConfig(s) are applied:
 ```bash
-sudo systemctl reboot
+oc get machineconfig
 ```
 
 Check updated kernel boot parameters are present:
 ```bash
 cat /proc/cmdline
 ```
+-`nohibernate`
+-`kvm_intel_tdx=1`
+-`intel_iommu=on` (GPU only)
+-`iommu=pt` (GPU only)
 
 Verify the TDX module is initialized:
 ```bash
@@ -93,17 +126,12 @@ sudo dmesg | grep -i tdx
 # virt/tdx: module initialized
 ```
 
-### Minimum software requirements
-
-- Red Hat OpenShift 4.21+
-- Red Hat OpenShift AI 2.25+
-- OpenShift CLI (`oc`) - [Download here](https://docs.openshift.com/container-platform/latest/cli_reference/openshift_cli/getting-started-cli.html)
-- Helm CLI (`helm`) - [Download here](https://helm.sh/docs/intro/install/)
+#### Install OpenShift Operators
 
 Install the following from **Ecosystem->Software Catalog** on the OpenShift console. This is a one-time setup.
 
-#### 1. Node Feature Discovery (NFD) v4.21+
-- Install **Node Feature Discovery Operator** from Ecosystem->Software Catalog into `openshift-nfd`
+##### 1. Node Feature Discovery (NFD) v4.21+
+- Install **Node Feature Discovery Operator** into `openshift-nfd`
 - Go to **NFD → Create NodeFeatureDiscovery → Accept defaults → Create**
 - Verify:
 ```bash
@@ -111,9 +139,16 @@ oc get pods -n openshift-nfd
 # Should show nfd-controller-manager, nfd-master, nfd-worker all Running
 ```
 
-#### 2. NVIDIA GPU Operator v26.3.0+ (GPU only) 
-- Install **NVIDIA GPU Operator** from Ecosystem->Software Catalog into `nvidia-gpu-operator`
-- Go to **NVIDIA GPU Operator → Create ClusterPolicy → Accept defaults → Create**
+##### 2. Intel Device Plugins Operator v0.35.0+
+- Install **Intel Device Plugins Operator** into `openshift-operators`
+- Go to **Intel Device Plugins Operators → Intel Software Guard Extensions Device Plugin → Create SgxDevicePlugin → Accept defaults → Create**
+
+##### 3. NVIDIA GPU Operator v26.3.0+ (GPU only) 
+- Install **NVIDIA GPU Operator** into `nvidia-gpu-operator`
+- Create a custom ClusterPolicy to enable it with OpenShift Sandboxed Containers. Notable fields: `ccManager`, `kataSandboxDevicePlugin`, `sandboxWorkloads`.
+```bash
+oc create -f helm/tdx-setup/gpu-cluster-policy.yaml
+```
 - Wait 10-20 minutes for driver compilation, then verify:
 ```bash
 oc get pods -n nvidia-gpu-operator
@@ -122,31 +157,51 @@ oc describe node $(oc get nodes -o jsonpath='{.items[0].metadata.name}') | grep 
 # Should show nvidia.com/gpu: 1
 ```
 
-#### 3. OpenShift Sandboxed Containers Operator v1.12.0+
+##### 4. OpenShift Sandboxed Containers Operator v1.12.0+
 This is required to run Kata Containers, which are used to run Intel TDX-protected VMs (Trusted Domains).
-- Install **OpenShift sandboxed containers Operator** from Ecosystem->Software Catalog
-- Go to **OpenShift sandboxed containers Operator → KataConfig → Create KataConfig**. Use any name.
-- Wait until the KataConfig is ready, then verify *kata-cc* and *kata-cc-nvidia-gpu* (if running with GPU) runtimeClasses are present:
-```bash
-oc get runtimeClasses
-```
 
-#### 4. Red Hat Build of Trustee v1.1.0+
+##### 5. Red Hat Build of Trustee v1.1.0+
 This is required for TDX attestation for confidential containers.
 
-#### 5. LVM Storage v4.19+
+##### 6. LVM Storage v4.19+
 - Install a blank secondary disk. Wipe it empty and acquire the persistent path i.e. /dev/disk/by-path/pci-xxxx:xx:xx.x-nvme-x
-- Install **LVM Storage** from Ecosystem->Software Catalog into `openshift-storage`
+- Install **LVM Storage** into `openshift-storage`
 - Go to **LVM Storage → Create LVMCluster → storage → deviceClasses → deviceSelector → paths**
 - Add the path to the secondary disk.
 - Press "Create".
 - Go to StorageClass and update this disk to be the default class. All required PersistentVolumes and PersistentVolumeClaims will be based on this StorageClass. Note down the name of this StorageClass.
 
+#### Enable Confidential Containers with OpenShift Sandboxed Contaienrs
+
+##### Create Feature Gate
+Creating an `osc-feature-gates` config map will enable confidential containers. The deployment mode determines how the OpenShift Sandboxed Containers Operator installs and configures the Kata runtime. By default, use the Machine Config Operator (MCO).
+```bash
+oc create -f helm/tdx-setup/feature-gate.yaml
+```
+
+##### Create KataConfig
+Creating the Kataconfig custom resource will install the `kata-cc` and `kata-cc-nvidia-gpu` (if NVIDIA GPU Operator was set up properly) runtime classes needed to run the workloads inside confidential containers. Note inside `tdx-kataconfig.yaml`, `checkNodeEligibility` must be set to `true` and the label `kata-cc` is set to `true`.
+```bash
+oc create -f helm/tdx-setup/tdx-kataconfig.yaml
+```
+
+This will trigger an automatic reboot, taking 10-60 minutes depending on deployment size, hardware type, and other factors. Monitor the status until the `InProgress` condition is `False`:
+```bash
+watch "oc describe kataconfig | sed -n /^Status:/,/^Events/p"
+```
+
+Then verify the runtime classes `kata-cc` and `kata-cc-nvidia-gpu` (if using GPU) are present:
+```bash
+oc get runtimeclass
+```
+
+#### Create initdata (optional)
+To securely initialize a pod, initdata can be created. Follow these [instructions](https://docs.redhat.com/en/documentation/openshift_sandboxed_containers/1.12/html-single/deploying_confidential_containers_on_bare-metal_servers/index#create-initdata_metal-cc) to generate it, then replace the value of `io.katacontainers.config.hypervisor.cc_init_data` inside [deployment.yaml](./helm/templates/deployment.yaml).
 
 ### Additional
 
 - User permissions: standard user. No elevated cluster permissions required.
-- Hugging Face token: [acquire a token](https://huggingface.co/settings/tokens).
+- Hugging Face token: [acquire a token](https://huggingface.co/settings/tokens)
 
 
 ## Deploy
@@ -160,11 +215,6 @@ This AI Quickstart will deploy one of two models depending on the hardware platf
 ```bash
 git clone https://github.com/rh-ai-quickstart/confidential-ai-inference
 cd confidential-ai-inference
-```
-
-### Checkout this branch
-```bash
-git checkout initial-commit
 ```
 
 ### Create the project

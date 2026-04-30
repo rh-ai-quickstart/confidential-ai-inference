@@ -1,0 +1,13 @@
+apiVersion: nfd.k8s.io/v1
+kind: NodeFeatureRule
+metadata:
+  name: intel-tdx-discovery
+spec:
+  rules:
+    - name: "intel-tdx-available"
+      labels:
+        "feature.node.kubernetes.io/cpu-cpuid.TDX": "true"
+      matchFeatures:
+        - feature: cpu.cpuid
+          matchExpressions:
+            TDX: {op: Exists}
