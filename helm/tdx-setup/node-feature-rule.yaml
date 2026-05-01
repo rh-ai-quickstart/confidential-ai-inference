@@ -1,0 +1,71 @@
+apiVersion: nfd.openshift.io/v1alpha1
+kind: NodeFeatureRule
+metadata:
+  name: consolidated-hardware-features
+  namespace: openshift-nfd
+spec:
+  rules:
+    - name: "runtime.kata"
+      labels:
+        feature.node.kubernetes.io/runtime.kata: "true"
+      matchAny:
+        - matchFeatures:
+            - feature: cpu.cpuid
+              matchExpressions:
+                SSE42: { op: Exists }
+                VMX: { op: Exists }
+            - feature: kernel.loadedmodule
+              matchExpressions:
+                kvm: { op: Exists }
+                kvm_intel: { op: Exists }
+        - matchFeatures:
+            - feature: cpu.cpuid
+              matchExpressions:
+                SSE42: { op: Exists }
+                SVM: { op: Exists }
+            - feature: kernel.loadedmodule
+              matchExpressions:
+                kvm: { op: Exists }
+                kvm_amd: { op: Exists }
+    - name: "amd.sev-snp"
+      labels:
+        amd.feature.node.kubernetes.io/snp: "true"
+      extendedResources:
+        sev-snp.amd.com/esids: "@cpu.security.sev.encrypted_state_ids"
+      matchFeatures:
+        - feature: cpu.cpuid
+          matchExpressions:
+            SVM: { op: Exists }
+        - feature: cpu.security
+          matchExpressions:
+            sev.snp.enabled: { op: Exists }
+
+    - name: "intel.sgx"
+      labels:
+        intel.feature.node.kubernetes.io/sgx: "true"
+      extendedResources:
+        sgx.intel.com/epc: "@cpu.security.sgx.epc"
+      matchFeatures:
+        - feature: cpu.cpuid
+          matchExpressions:
+            SGX: { op: Exists }
+            SGXLC: { op: Exists }
+        - feature: cpu.security
+          matchExpressions:
+            sgx.enabled: { op: IsTrue }
+        - feature: kernel.config
+          matchExpressions:
+            X86_SGX: { op: Exists }
+
+    - name: "intel.tdx"
+      labels:
+        intel.feature.node.kubernetes.io/tdx: "true"
+      extendedResources:
+        tdx.intel.com/keys: "@cpu.security.tdx.total_keys"
+      matchFeatures:
+        - feature: cpu.cpuid
+          matchExpressions:
+            VMX: { op: Exists }
+        - feature: cpu.security
+          matchExpressions:
+            tdx.enabled: { op: Exists }
