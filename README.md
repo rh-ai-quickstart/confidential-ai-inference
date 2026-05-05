@@ -189,7 +189,7 @@ This will trigger an automatic reboot, taking 10-60 minutes depending on deploym
 ```bash
 watch "oc describe kataconfig | sed -n /^Status:/,/^Events/p"
 ```
-Alternatively, on the OpenShift console, go to the OpenShift sandboxed containers Operator → KataConfig → `example-kataconfig`' and confirm `InProgress` is set to `False`.
+Alternatively, on the OpenShift console, go to the OpenShift sandboxed containers Operator → KataConfig → name of KataConfig' and confirm `InProgress` is set to `False`.
 
 Then verify the runtime classes `kata-cc` and `kata-cc-nvidia-gpu` (if using GPU) are present:
 ```bash
@@ -314,7 +314,7 @@ The UI is exposed via an OpenShift Route with TLS. To get the URL, run this comm
 oc get route open-webui -n $PROJECT
 ```
 
-Open this URL in a web browser. Enter in prompts to generate responses from the model, while being protected by Intel® TDX.
+Open this URL in a web browser. Enter in prompts to generate responses from the model and upload the `sample-data/transactions.csv` file. One use case of protecting data with Intel® TDX is credit card transactions with personal user information. Memory dumps will not be able to retrieve such data when inside these confidential containers.
 
 
 ## Delete

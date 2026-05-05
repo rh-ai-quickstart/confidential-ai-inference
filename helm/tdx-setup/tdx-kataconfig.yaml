@@ -1,7 +1,7 @@
 apiVersion: kataconfiguration.openshift.io/v1
 kind: KataConfig
 metadata:
-  name: example-kataconfig
+  name: tdx-kataconfig
 spec:
   enablePeerPods: false
   checkNodeEligibility: true
