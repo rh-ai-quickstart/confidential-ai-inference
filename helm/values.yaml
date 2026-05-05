@@ -28,7 +28,7 @@ deploymentConfigs:
         memory: "64Gi"
         nvidia.com/pgpu: 1
   cpu:
-    image: quay.io/vllm/automation-vllm:0.18.0rc1.dev7_rhaiv.0.ge974742fb.cpu
+    image: quay.io/vllm/automation-vllm:0.18.0_rhaiv.5.cpu
     katacontainers:
       resourceName: ""
       runtimeClassName: "kata-cc"
