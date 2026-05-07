@@ -71,7 +71,7 @@ To support Intel remote attestation and provision required platform manifests, t
 
 #### MachineConfig Setup
 
->**Note:** It is possible to apply both MachineConfigs for Intel® TDX and NVIDIA GPU before reboot. The MachineConfigPool for the target pool (`master`, `worker`, `kata-oc`) can be paused by setting `spec.paused` to `true`, apply the MachineConfigs, then set `spec.paused` back to `false`.
+>**Note:** It is possible to apply both MachineConfigs for Intel® TDX and NVIDIA GPU before reboot. The MachineConfigPool for the target pool (`master`, `worker`, `kata-oc`) can be paused by setting `spec.paused` to `true` or from the `Actions` dropdown menu, apply the MachineConfigs, then set `spec.paused` back to `false` or `Actions` dropdown menu to `Resume updates`.
 
 ##### Create MachineConfig for Intel® TDX 
 A `MachineConfig` object is needed to configure the required kernel parameters and modules on the cluster nodes. [Reference](https://docs.redhat.com/en/documentation/openshift_sandboxed_containers/1.12/html-single/deploying_confidential_containers_on_bare-metal_servers/index#creating-tdx-machineconfig_metal-cc)
@@ -132,7 +132,7 @@ Install the following from **Ecosystem->Software Catalog** on the OpenShift cons
 
 ##### 1. Node Feature Discovery (NFD) v4.21+
 - Install **Node Feature Discovery Operator** into `openshift-nfd`
-- Go to **Node Feature Discovery Operator → Create NodeFeatureDiscovery → Accept defaults → Create**
+- Create a NodeFeatureDiscovery. Go to **Node Feature Discovery Operator → Create NodeFeatureDiscovery → Accept defaults → Create**
 - Verify:
 ```bash
 oc get pods -n openshift-nfd
@@ -146,14 +146,18 @@ oc create -f helm/tdx-setup/node-feature-rule.yaml
 ```bash
 oc create -f helm/tdx-setup/node-feature-rule-gpu.yaml
 ```
-- This will trigger a reboot. Verify `tdx.intel.com/keys` and several `sgx.intel.com` labels are present:
+- This will trigger a reboot. Then verify `tdx.intel.com/keys` is present:
 ```bash
 oc describe node $(oc get nodes -o jsonpath='{.items[0].metadata.name}') | grep -A 20 "Allocatable"
 ```
 
 ##### 2. Intel Device Plugins Operator v0.35.0+
 - Install **Intel Device Plugins Operator** into `openshift-operators`
-- Go to **Intel Device Plugins Operators → Intel Software Guard Extensions Device Plugin → Create SgxDevicePlugin → Accept defaults → Create**
+- Create an SgxDevicePlugin. Go to **Intel Device Plugins Operators → Intel Software Guard Extensions Device Plugin → Create SgxDevicePlugin → Accept defaults → Create**
+- Verify several `sgx.intel.com` labels are present:
+```bash
+oc describe node $(oc get nodes -o jsonpath='{.items[0].metadata.name}') | grep -A 20 "Allocatable"
+```
 
 ##### 3. NVIDIA GPU Operator v26.3.0+ (GPU only) 
 - Install **NVIDIA GPU Operator** into `nvidia-gpu-operator`
@@ -171,7 +175,7 @@ oc describe node $(oc get nodes -o jsonpath='{.items[0].metadata.name}') | grep 
 
 ##### 4. OpenShift Sandboxed Containers Operator v1.12.0+
 This is required to run Kata Containers, which are used to run Intel TDX-protected VMs (Trusted Domains).
-Install **OpenShift sandboxed containers Operator**.
+Install **OpenShift sandboxed containers Operator** into `openshift-sandboxed-containers-operator`.
 
 __Create Feature Gate__
 Creating an `osc-feature-gates` config map will enable confidential containers. The deployment mode determines how the OpenShift Sandboxed Containers Operator installs and configures the Kata runtime. By default, use the Machine Config Operator (MCO).
@@ -199,7 +203,7 @@ oc get runtimeclass
 ##### 5. Red Hat Build of Trustee v1.1.0+
 This is required for TDX attestation for confidential containers.
 - Install **Red Hat build of Trustee** operator into `trustee-operator-system`.
-- Generate an HTTPS certificate `tls.crt` and key `tls.key`. Then create a Kubernetes TLS secret.
+- Generate an HTTPS certificate `tls.crt` and key `tls.key`. Then create a Kubernetes TLS secret, noting down the name.
 ```bash
 DOMAIN=$(oc get ingress.config/cluster -o jsonpath='{.spec.domain}')
 ROUTE="kbs-route-trustee-operator-system.${DOMAIN}"
@@ -214,7 +218,7 @@ oc create secret tls trustee-tls-cert -n trustee-operator-system \
   --cert=tls.crt \
   --key=tls.key
 ```
-- Go to **Red Hat build of Trustee → TrusteeConfig → Create TrusteeConfig**. For **httpsSpec.tlsSecretName**, use `trustee-tls-cert` or whatever name was used in the previous step. Hit **Create**. This will create a Kbs Config automatically as well.
+- Create a TrusteeConfig. Go to **Red Hat build of Trustee → TrusteeConfig → Create TrusteeConfig**. For **httpsSpec.tlsSecretName**, use `trustee-tls-cert` or whatever name was used in the previous step. Hit **Create**. This will create a Kbs Config automatically as well.
 - Verify the Trustee kbs-service is accessible:
 ```bash
 oc get svc -n trustee-operator-system kbs-service
@@ -225,7 +229,8 @@ oc get pods -n trustee-operator-system
 ```
 - For full customization, see the Deploying [Red Hat Build of Trustee for workloads running on bare-metal servers documentation](https://docs.redhat.com/en/documentation/openshift_sandboxed_containers/1.12/html-single/deploying_red_hat_build_of_trustee_for_workloads_running_on_bare-metal_servers/index#trustee-config-cr_metal-trustee).
 
-##### 6. LVM Storage v4.19+
+##### 6. LVM Storage v4.19+ (Optional)
+- Required only if a StorageClass in OpenShift is not yet available.
 - Install a blank secondary disk. Wipe it clean and acquire the persistent path. Below is an example for a blank disk named *nvme0n1*.
   - Check for available disks: *lsblk*
   - Wipe the disk: *wipefs -a /dev/nvme0n1*
@@ -265,7 +270,7 @@ TRUSTEE_URL=$(oc get route kbs-route \
 
 3. Convert the `initdata.toml` to a gzipped Base64-encoded string in a text file:
 ```bash
-cat initdata.toml | gzip | base64 -w0 > initdata.txt
+cat initdata.toml | gzip | base64 -w 0 > initdata.txt
 ```
 Use the contents of `initdata.txt` for the value of `io.katacontainers.config.hypervisor.cc_init_data` inside [deployment.yaml](./helm/templates/deployment.yaml).
 

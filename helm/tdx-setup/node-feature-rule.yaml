@@ -1,7 +1,7 @@
 apiVersion: nfd.openshift.io/v1alpha1
 kind: NodeFeatureRule
 metadata:
-  name: consolidated-hardware-features
+  name: tdx-features
   namespace: openshift-nfd
 spec:
   rules:
