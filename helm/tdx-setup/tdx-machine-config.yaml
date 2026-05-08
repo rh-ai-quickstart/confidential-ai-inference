@@ -1,0 +1,19 @@
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: master
+  name: 99-enable-intel-tdx
+spec:
+  kernelArguments:
+  - kvm_intel.tdx=1
+  - nohibernate
+  config:
+    ignition:
+      version: 3.5.0
+    storage:
+      files:
+        - path: /etc/modules-load.d/vsock.conf
+          mode: 0644
+          contents:
+            source: data:text/plain;charset=utf-8;base64,dnNvY2stbG9vcGJhY2sK

@@ -1,0 +1,4 @@
+apiVersion: v2
+description: A quickstart for AI inference using confidential containers
+name: confidential-ai-inference
+version: 1.0.0

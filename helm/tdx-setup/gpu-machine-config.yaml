@@ -1,0 +1,14 @@
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: master
+  name: 100-iommu-kernel-args
+spec:
+  config:
+    ignition:
+      version: 3.5.0
+  kernelArguments:
+  - amd_iommu=on
+  - intel_iommu=on
+  - iommu=pt

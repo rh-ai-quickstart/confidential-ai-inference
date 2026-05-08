@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" width="1080" height="740" viewBox="0 0 1080 740">
+
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#555"/>
+    </marker>
+    <marker id="arr-purple" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#9673a6"/>
+    </marker>
+    <marker id="arr-blue" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#6c8ebf"/>
+    </marker>
+    <marker id="arr-green" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#82b366"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1080" height="740" fill="#f4f4f4"/>
+
+  <!-- Title -->
+  <text x="540" y="32" font-family="Arial" font-size="20" font-weight="bold" fill="#1a1a2e" text-anchor="middle">Confidential AI Inference — Architecture</text>
+
+  <!-- ══ OpenShift Cluster boundary ══ -->
+  <rect x="185" y="48" width="875" height="672" rx="12" fill="white" stroke="#cc0000" stroke-width="2" stroke-dasharray="8 4"/>
+  <text x="622" y="68" font-family="Arial" font-size="12" font-weight="bold" fill="#cc0000" text-anchor="middle">Red Hat OpenShift Cluster</text>
+
+  <!-- ── Namespace boundary ── -->
+  <rect x="200" y="78" width="600" height="510" rx="10" fill="#fafafa" stroke="#999" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="500" y="96" font-family="Arial" font-size="10" fill="#999" text-anchor="middle">namespace: confidential-ai-inference</text>
+
+  <!-- ── Route ── -->
+  <rect x="215" y="108" width="150" height="65" rx="8" fill="#ffe6cc" stroke="#d6b656" stroke-width="2"/>
+  <text x="290" y="132" font-family="Arial" font-size="11" font-weight="bold" fill="#1a1a2e" text-anchor="middle">OpenShift Route</text>
+  <text x="290" y="148" font-family="Arial" font-size="10" fill="#1a1a2e" text-anchor="middle">open-webui</text>
+  <text x="290" y="163" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">TLS edge termination</text>
+
+  <!-- Route → Open WebUI -->
+  <path d="M 365 140 L 400 140" stroke="#555" stroke-width="1.8" fill="none" marker-end="url(#arr)"/>
+
+  <!-- ── Open WebUI ── -->
+  <rect x="400" y="108" width="155" height="65" rx="8" fill="#d5e8d4" stroke="#82b366" stroke-width="2"/>
+  <text x="477" y="132" font-family="Arial" font-size="11" font-weight="bold" fill="#1a1a2e" text-anchor="middle">Open WebUI</text>
+  <text x="477" y="148" font-family="Arial" font-size="10" fill="#1a1a2e" text-anchor="middle">ghcr.io/open-webui</text>
+  <text x="477" y="163" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">:8080</text>
+
+  <!-- Open WebUI → vLLM Service -->
+  <path d="M 555 140 L 590 140" stroke="#555" stroke-width="1.8" fill="none" marker-end="url(#arr)"/>
+  <text x="572" y="132" font-family="Arial" font-size="8" fill="#555" text-anchor="middle">OpenAI</text>
+  <text x="572" y="152" font-family="Arial" font-size="8" fill="#555" text-anchor="middle">API v1</text>
+
+  <!-- ── vLLM Service ── -->
+  <rect x="590" y="108" width="150" height="65" rx="8" fill="#ffe6cc" stroke="#d6b656" stroke-width="2"/>
+  <text x="665" y="132" font-family="Arial" font-size="11" font-weight="bold" fill="#1a1a2e" text-anchor="middle">vLLM Service</text>
+  <text x="665" y="148" font-family="Arial" font-size="10" fill="#1a1a2e" text-anchor="middle">vllm-gpu-service</text>
+  <text x="665" y="163" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">NodePort :8080</text>
+
+  <!-- vLLM Service ↓ Kata container -->
+  <path d="M 665 173 L 665 205" stroke="#555" stroke-width="1.8" fill="none" marker-end="url(#arr)"/>
+
+  <!-- ══ Kata / TDX boundary ══ -->
+  <rect x="215" y="205" width="570" height="370" rx="12" fill="#fff5f5" stroke="#cc0000" stroke-width="2.5"/>
+  <text x="500" y="226" font-family="Arial" font-size="11" font-weight="bold" fill="#cc0000" text-anchor="middle">Kata Container — Intel® TDX Trust Domain (Protected VM)</text>
+
+  <!-- vLLM Server box -->
+  <rect x="230" y="238" width="540" height="100" rx="8" fill="#dae8fc" stroke="#6c8ebf" stroke-width="1.8"/>
+  <text x="500" y="258" font-family="Arial" font-size="11" font-weight="bold" fill="#1a1a2e" text-anchor="middle">vLLM Server — quay.io/confidential-devhub/rhaiis:latest</text>
+
+  <!-- vLLM Engine -->
+  <rect x="245" y="268" width="175" height="55" rx="6" fill="white" stroke="#6c8ebf" stroke-width="1.5"/>
+  <text x="332" y="291" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">vLLM Engine</text>
+  <text x="332" y="308" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">OpenAI API :8080</text>
+
+  <!-- Model -->
+  <rect x="445" y="268" width="175" height="55" rx="6" fill="white" stroke="#6c8ebf" stroke-width="1.5"/>
+  <text x="532" y="288" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">Model Weights</text>
+  <text x="532" y="302" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">GPU: Llama-4-Scout w4a16</text>
+  <text x="532" y="315" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">CPU: Llama-3.1-8B-Instruct</text>
+
+  <!-- Encrypted memory bar -->
+  <rect x="230" y="352" width="540" height="42" rx="6" fill="#f8cecc" stroke="#b85450" stroke-width="1.5"/>
+  <text x="500" y="370" font-family="Arial" font-size="11" font-weight="bold" fill="#b85450" text-anchor="middle">🔒 Encrypted Memory (TDX)</text>
+  <text x="500" y="386" font-family="Arial" font-size="9" fill="#b85450" text-anchor="middle">Model weights · KV cache · user queries — encrypted at rest and in use</text>
+
+  <!-- Attestation box -->
+  <rect x="230" y="408" width="540" height="152" rx="8" fill="#f3eef8" stroke="#9673a6" stroke-width="1.8"/>
+  <text x="500" y="428" font-family="Arial" font-size="11" font-weight="bold" fill="#1a1a2e" text-anchor="middle">Attestation Flow</text>
+
+  <rect x="245" y="438" width="175" height="52" rx="6" fill="white" stroke="#9673a6" stroke-width="1.5"/>
+  <text x="332" y="460" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">Trustee Agent</text>
+  <text x="332" y="476" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">Remote Attestation</text>
+
+  <path d="M 420 464 L 445 464" stroke="#9673a6" stroke-width="1.5" fill="none" marker-end="url(#arr-purple)"/>
+
+  <rect x="445" y="438" width="175" height="52" rx="6" fill="white" stroke="#9673a6" stroke-width="1.5"/>
+  <text x="532" y="460" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">Key Broker Service</text>
+  <text x="532" y="476" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">Releases encryption keys</text>
+
+  <rect x="245" y="503" width="510" height="45" rx="5" fill="white" stroke="#9673a6" stroke-width="1"/>
+  <text x="500" y="521" font-family="Arial" font-size="9" fill="#9673a6" text-anchor="middle" font-weight="bold">Intel® TDX Quote Verification</text>
+  <text x="500" y="537" font-family="Arial" font-size="9" fill="#9673a6" text-anchor="middle">Remote attester verifies TDX quote before releasing encryption keys</text>
+
+  <!-- ══ Host Node Hardware (inside cluster, outside namespace) ══
+       Centered in the right column: namespace right edge = x=800, cluster right edge = x=1080
+       Right-column center = x=940  →  box x=830, w=220
+  -->
+  <rect x="830" y="78" width="220" height="198" rx="10" fill="#eaf3fb" stroke="#6c8ebf" stroke-width="2"/>
+  <text x="940" y="97" font-family="Arial" font-size="11" font-weight="bold" fill="#1a1a2e" text-anchor="middle">Host Node Hardware</text>
+
+  <!-- NVIDIA GPU (top sub-box) -->
+  <rect x="843" y="106" width="194" height="72" rx="6" fill="white" stroke="#6c8ebf" stroke-width="1.5"/>
+  <text x="940" y="124" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">NVIDIA GPU</text>
+  <text x="940" y="139" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">H100 / H200 / B200</text>
+  <text x="940" y="153" font-family="Arial" font-size="8" fill="#888" text-anchor="middle">Confidential Computing mode</text>
+  <text x="940" y="166" font-family="Arial" font-size="8" fill="#888" text-anchor="middle">PCI passthrough → TDX VM</text>
+
+  <!-- Intel Xeon (bottom sub-box) -->
+  <rect x="843" y="186" width="194" height="72" rx="6" fill="white" stroke="#6c8ebf" stroke-width="1.5"/>
+  <text x="940" y="204" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">Intel® Xeon Scalable</text>
+  <text x="940" y="219" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">5th Gen+ · TDX enabled in BIOS</text>
+  <text x="940" y="234" font-family="Arial" font-size="8" fill="#888" text-anchor="middle">Provides TDX Trust Domain</text>
+  <text x="940" y="247" font-family="Arial" font-size="8" fill="#888" text-anchor="middle">hardware isolation + encryption</text>
+
+  <!-- GPU bottom-center → Kata TDX left edge (PCI passthrough) -->
+  <path d="M 880 178 L 785 230" stroke="#6c8ebf" stroke-width="1.8" fill="none" stroke-dasharray="6 3" marker-end="url(#arr-blue)"/>
+  <text x="822" y="196" font-family="Arial" font-size="8" fill="#6c8ebf" text-anchor="middle">PCI passthrough</text>
+
+  <!-- Xeon bottom-center → Kata TDX left edge (TDX native) -->
+  <path d="M 940 258 L 785 300" stroke="#82b366" stroke-width="1.8" fill="none" stroke-dasharray="6 3" marker-end="url(#arr-green)"/>
+  <text x="870" y="272" font-family="Arial" font-size="8" fill="#82b366" text-anchor="middle">TDX native</text>
+
+  <!-- ══ Kata Runtime (inside cluster, outside namespace) ══
+       Same center x=940, sits below Host Node Hardware with 12px gap
+  -->
+  <rect x="830" y="290" width="220" height="185" rx="10" fill="#fff9e6" stroke="#d6b656" stroke-width="2"/>
+  <text x="940" y="309" font-family="Arial" font-size="11" font-weight="bold" fill="#1a1a2e" text-anchor="middle">Kata Runtime</text>
+
+  <rect x="843" y="319" width="194" height="48" rx="5" fill="white" stroke="#d6b656" stroke-width="1.2"/>
+  <text x="940" y="337" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">RuntimeClass</text>
+  <text x="940" y="352" font-family="Arial" font-size="8" fill="#555" text-anchor="middle">kata-cc-nvidia-gpu (GPU + TDX)</text>
+  <text x="940" y="363" font-family="Arial" font-size="8" fill="#555" text-anchor="middle">kata-cc (CPU + TDX)</text>
+
+  <rect x="843" y="375" width="194" height="38" rx="5" fill="white" stroke="#d6b656" stroke-width="1.2"/>
+  <text x="940" y="391" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">Kata Deploy DaemonSet</text>
+  <text x="940" y="406" font-family="Arial" font-size="8" fill="#555" text-anchor="middle">kata-as-coco-runtime</text>
+
+  <rect x="843" y="421" width="194" height="40" rx="5" fill="white" stroke="#d6b656" stroke-width="1.2"/>
+  <text x="940" y="437" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">katacontainers.io/kata-runtime: true</text>
+  <text x="940" y="452" font-family="Arial" font-size="8" fill="#888" text-anchor="middle">node label applied by NFD</text>
+
+  <!-- ══ Cluster Operators (bottom, inside cluster, outside namespace) ══ -->
+  <rect x="200" y="610" width="845" height="100" rx="10" fill="#f5f5f5" stroke="#999" stroke-width="1.5" stroke-dasharray="5 3"/>
+  <text x="622" y="628" font-family="Arial" font-size="10" font-weight="bold" fill="#666" text-anchor="middle">Cluster Operators (one-time setup)</text>
+
+  <!-- NFD Operator -->
+  <rect x="212" y="635" width="158" height="62" rx="8" fill="#d5e8d4" stroke="#82b366" stroke-width="1.8"/>
+  <text x="291" y="656" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">Node Feature Discovery</text>
+  <text x="291" y="671" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">NFD Operator — openshift-nfd</text>
+  <text x="291" y="685" font-family="Arial" font-size="8" fill="#888" text-anchor="middle">Detects hardware features, labels nodes</text>
+
+  <!-- NVIDIA GPU Operator -->
+  <rect x="378" y="635" width="158" height="62" rx="8" fill="#ffe6cc" stroke="#d6b656" stroke-width="1.8"/>
+  <text x="457" y="656" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">NVIDIA GPU Operator</text>
+  <text x="457" y="671" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">nvidia-gpu-operator</text>
+  <text x="457" y="685" font-family="Arial" font-size="8" fill="#888" text-anchor="middle">Driver, toolkit, device plugin</text>
+
+  <!-- Sandboxed Containers Operator -->
+  <rect x="544" y="635" width="158" height="62" rx="8" fill="#f8cecc" stroke="#b85450" stroke-width="1.8"/>
+  <text x="623" y="656" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">Sandboxed Containers</text>
+  <text x="623" y="671" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">OpenShift Sandboxed Containers</text>
+  <text x="623" y="685" font-family="Arial" font-size="8" fill="#888" text-anchor="middle">Kata shim installation</text>
+
+  <!-- Trustee Operator -->
+  <rect x="710" y="635" width="158" height="62" rx="8" fill="#f3eef8" stroke="#9673a6" stroke-width="1.8"/>
+  <text x="789" y="656" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">Red Hat Build of Trustee</text>
+  <text x="789" y="671" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">Trustee Operator</text>
+  <text x="789" y="685" font-family="Arial" font-size="8" fill="#888" text-anchor="middle">TDX attestation &amp; key release</text>
+
+  <!-- LVM Storage Operator -->
+  <rect x="876" y="635" width="158" height="62" rx="8" fill="#eaf3fb" stroke="#6c8ebf" stroke-width="1.8"/>
+  <text x="955" y="656" font-family="Arial" font-size="10" font-weight="bold" fill="#1a1a2e" text-anchor="middle">LVM Storage</text>
+  <text x="955" y="671" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">openshift-storage</text>
+  <text x="955" y="685" font-family="Arial" font-size="8" fill="#888" text-anchor="middle">PVC provisioning</text>
+
+  <!-- ── User (outside cluster) ── -->
+  <rect x="20" y="108" width="130" height="65" rx="8" fill="#dae8fc" stroke="#6c8ebf" stroke-width="2"/>
+  <text x="85" y="133" font-family="Arial" font-size="12" font-weight="bold" fill="#1a1a2e" text-anchor="middle">User</text>
+  <text x="85" y="150" font-family="Arial" font-size="10" fill="#1a1a2e" text-anchor="middle">Web Browser</text>
+  <text x="85" y="166" font-family="Arial" font-size="9" fill="#555" text-anchor="middle">HTTPS</text>
+
+  <!-- User → Route -->
+  <path d="M 150 140 L 215 140" stroke="#555" stroke-width="1.8" fill="none" marker-end="url(#arr)"/>
+  <text x="182" y="133" font-family="Arial" font-size="8" fill="#555" text-anchor="middle">TLS</text>
+
+  <!-- ── HuggingFace (outside cluster) ── -->
+  <rect x="20" y="270" width="130" height="70" rx="8" fill="#fff9e6" stroke="#d6b656" stroke-width="2"/>
+  <text x="85" y="293" font-family="Arial" font-size="11" font-weight="bold" fill="#1a1a2e" text-anchor="middle">HuggingFace</text>
+  <text x="85" y="310" font-family="Arial" font-size="10" fill="#555" text-anchor="middle">Model Download</text>
+  <text x="85" y="326" font-family="Arial" font-size="9" fill="#888" text-anchor="middle">init container · emptyDir</text>
+
+  <!-- HuggingFace → Kata (emptyDir) -->
+  <path d="M 150 305 L 215 305" stroke="#d6b656" stroke-width="1.5" fill="none" stroke-dasharray="5 3" marker-end="url(#arr)"/>
+
+</svg>

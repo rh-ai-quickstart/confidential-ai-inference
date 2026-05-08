@@ -1,0 +1,103 @@
+# Default values for confidential-computing.
+
+# Namespace will be automatically set by Helm to {{ .Release.Namespace }}
+
+# User-customizable configuration
+device: "gpu"  # Options: ["gpu", "cpu"]
+sa: "vllm-sa"
+
+# Device-specific deployment configuration
+deploymentConfigs:
+  gpu:
+    image: quay.io/confidential-devhub/rhaiis:latest
+    katacontainers:
+      resourceName: "nvidia.com/pgpu"
+      runtimeClassName: "kata-cc-nvidia-gpu"
+      memory: "131072"
+    nodeSelector:
+      node-role.kubernetes.io/master: ""
+    env:
+      CUDA_VISIBLE_DEVICES: "0"
+    resources:
+      limits:
+        cpu: "32"
+        memory: "80Gi"
+        nvidia.com/pgpu: 1
+      requests:
+        cpu: "16"
+        memory: "64Gi"
+        nvidia.com/pgpu: 1
+  cpu:
+    image: quay.io/vllm/automation-vllm:0.18.0_rhaiv.5.cpu
+    katacontainers:
+      resourceName: ""
+      runtimeClassName: "kata-cc"
+      memory: "131072"
+      vcpus: "64"
+      count: 0
+    nodeSelector: {}
+    env:
+      VLLM_CPU_KVCACHE_SPACE: "40"
+      VLLM_RPC_TIMEOUT: "100000"
+      VLLM_ALLOW_LONG_MAX_MODEL_LEN: "1"
+      VLLM_ENGINE_ITERATION_TIMEOUT_S: "120"
+      VLLM_CPU_NUM_OF_RESERVED_CPU: "0"
+      VLLM_CPU_SGL_KERNEL: "1"
+      HF_HUB_DISABLE_XET: "1"
+    resources:
+      limits:
+        cpu: "64"
+        memory: "80Gi"
+      requests:
+        cpu: "64"
+        memory: "80Gi"
+
+# Model configuration
+model:
+  gpu:
+    repo: "RedHatAI/Llama-4-Scout-17B-16E-Instruct-quantized.w4a16"  # HuggingFace repo to download
+    localDir: "Llama-4-Scout-17B-16E-Instruct-quantized"             # Local directory name under /models-cache
+    servedName: "Llama-4-Scout-17B-16E-Instruct-quantized"           # Name exposed by vLLM API
+    toolCallParser: "llama4_pythonic"
+    args:
+      - --max-model-len=32000
+      - --gpu-memory-utilization=0.90
+      - --enable-chunked-prefill
+      - --enable_prefix_caching
+      - --enforce-eager
+      - --tensor-parallel-size=1
+  cpu:
+    repo: "meta-llama/Llama-3.1-8B-Instruct"  # HuggingFace repo to download
+    localDir: "Llama-3.1-8B-Instruct"         # Local directory name under /models-cache
+    servedName: "Llama-3.1-8B-Instruct"       # Name exposed by vLLM API
+    toolCallParser: "llama3_json"
+    args:
+      - --block-size=128
+      - --dtype=bfloat16
+      - --max-model-len=8192
+      - --distributed-executor-backend=mp
+      - --max-num-batched-tokens=4096
+      - --max-num-seqs=16
+      - --tensor-parallel-size=1
+      - --pipeline-parallel-size=1
+
+# Secret configuration
+hfToken: ""
+
+# StorageClass configuration
+# Create an LVM Cluster using the LVM Storage operator, then specify the name of the StorageClass here
+storageClassName: lvms-vg1
+
+# Model cache block volume configuration
+modelCache:
+  storageSize: "64Gi"
+
+# Open WebUI PVC configuration
+openWebUI:
+  storageSize: "2Gi"
+  keepOnUninstall: false    # false = PVC deleted on helm uninstall
+
+# Credit card transaction processor configuration
+creditCardProcessor:
+  maxUploadSizeBytes: "104857600"  # 100 MB max CSV upload size in Open WebUI
+  allowedUploadExtensions: "csv,txt,json,pdf"

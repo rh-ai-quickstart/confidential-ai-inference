@@ -1,0 +1,206 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-{{ .Values.device }}-confidential
+  labels:
+    app: vllm
+    component: vllm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: vllm
+      component: vllm
+  template:
+    metadata:
+      labels:
+        app: vllm
+        component: vllm
+      annotations:
+        io.katacontainers.config.hypervisor.default_memory: {{ (index .Values.deploymentConfigs .Values.device).katacontainers.memory | quote }}
+        io.katacontainers.config.hypervisor.kernel_params: "agent.guest_components_rest_api=all"
+        io.katacontainers.config.hypervisor.cc_init_data: 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
+        io.katacontainers.config.runtime.create_container_timeout: '7200'
+    spec:
+      serviceAccountName: {{ .Values.sa }}
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      enableServiceLinks: true
+      preemptionPolicy: PreemptLowerPriority
+      terminationGracePeriodSeconds: 60
+      {{- with (index .Values.deploymentConfigs .Values.device).katacontainers.runtimeClassName }}
+      runtimeClassName: {{ . }}
+      {{- end }}
+      securityContext:
+        runAsUser: 0
+        seLinuxOptions:
+          level: "s0:c29,c4"
+      {{- with (index .Values.deploymentConfigs .Values.device).nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: init-attestation
+          image: storytel/alpine-bash-curl:latest
+          command: [ "/bin/sh","-c" ]
+          args:
+            - echo starting;
+              (curl http://127.0.0.1:8006/aa/token\?token_type\=kbs | grep -iv "get token failed" | grep -iv "error" | grep -i token && echo "ATTESTATION COMPLETED SUCCESSFULLY") || (echo "ATTESTATION FAILED" && exit 1);
+        - name: download-model
+          image: {{ (index .Values.deploymentConfigs .Values.device).image }}
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/bash
+            - -c
+            - |
+              if [ -d "/models-cache/{{ (index .Values.model .Values.device).localDir }}" ] && [ "$(ls -A /models-cache/{{ (index .Values.model .Values.device).localDir }})" ]; then
+                echo "Model already exists at /models-cache/{{ (index .Values.model .Values.device).localDir }}, skipping download"
+                exit 0
+              fi
+              mkdir -p /models-cache/hf && \
+              mkdir -p /models-cache/.cache && \
+              export HF_HOME=/models-cache/hf && \
+              export HF_HUB_OFFLINE=0 && \
+              huggingface-cli download \
+                --cache-dir /models-cache/.cache \
+                --local-dir-use-symlinks False \
+                --revision main \
+                --local-dir /models-cache/{{ (index .Values.model .Values.device).localDir }} \
+                {{ (index .Values.model .Values.device).repo }}
+          env:
+            - name: HUGGING_FACE_HUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: huggingface-secret
+                  key: token
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          volumeMounts:
+            - name: models-cache
+              mountPath: /models-cache
+      containers:
+        - name: server
+          image: {{ (index .Values.deploymentConfigs .Values.device).image }}
+          imagePullPolicy: IfNotPresent
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 15"]
+          command:
+            - /bin/bash
+            - -c
+            - |
+              {{- if eq .Values.device "gpu" }}
+              echo '/usr/lib64' >> /etc/ld.so.conf.d/nvidia.conf && ldconfig && \
+              {{- end }}
+              python3 -m vllm.entrypoints.openai.api_server \
+                --port=8080 \
+                --model=/models-cache/{{ (index .Values.model .Values.device).localDir }} \
+                --served-model-name={{ (index .Values.model .Values.device).servedName }} \
+                --enable-auto-tool-choice \
+                --tool-call-parser={{ (index .Values.model .Values.device).toolCallParser }} \
+                --trust-remote-code \
+                {{ join " \\\n                " (index .Values.model .Values.device).args }}
+          {{- with (index .Values.deploymentConfigs .Values.device).resources }}
+          resources:
+            limits:
+              cpu: {{ .limits.cpu }}
+              memory: {{ .limits.memory }}
+              {{- with (index $.Values.deploymentConfigs $.Values.device).katacontainers.resourceName }}
+              {{ . }}: '1'
+              {{- end }}
+            requests:
+              cpu: {{ .requests.cpu }}
+              memory: {{ .requests.memory }}
+              {{- with (index $.Values.deploymentConfigs $.Values.device).katacontainers.resourceName }}
+              {{ . }}: '1'
+              {{- end }}
+          {{- end }}
+          env:
+            - name: HUGGING_FACE_HUB_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: huggingface-secret
+                  key: token
+            {{- range $key, $val := (index .Values.deploymentConfigs .Values.device).env }}
+            - name: {{ $key }}
+              value: {{ $val | quote }}
+            {{- end }}
+          securityContext:
+            privileged: true
+            runAsUser: 0
+            capabilities:
+              drop:
+                - MKNOD
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+              scheme: HTTP
+            timeoutSeconds: 5
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+              scheme: HTTP
+            timeoutSeconds: 8
+            periodSeconds: 100
+            successThreshold: 1
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8080
+              scheme: HTTP
+            timeoutSeconds: 1
+            periodSeconds: 30
+            successThreshold: 1
+            failureThreshold: 120
+          volumeMounts:
+            - name: shm
+              mountPath: /dev/shm
+            - name: models-cache
+              mountPath: /models-cache
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      volumes:
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi
+        - name: models-cache
+          emptyDir:
+            sizeLimit: {{ .Values.modelCache.storageSize }}
+      dnsPolicy: ClusterFirst
+      tolerations:
+        - key: node.kubernetes.io/not-ready
+          operator: Exists
+          effect: NoExecute
+          tolerationSeconds: 300
+        - key: node.kubernetes.io/unreachable
+          operator: Exists
+          effect: NoExecute
+          tolerationSeconds: 300
+        - key: node-role.kubernetes.io/master
+          operator: Exists
+          effect: NoSchedule
+        - key: node-role.kubernetes.io/control-plane
+          operator: Exists
+          effect: NoSchedule
+        {{- with (index .Values.deploymentConfigs .Values.device).katacontainers.resourceName }}
+        - key: {{ . }}
+          operator: Exists
+          effect: NoSchedule
+        {{- end }}
+  strategy:
+    type: Recreate
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600

@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: vllm-{{ .Values.device }}-service
+  labels:
+    app: vllm
+    component: vllm
+spec:
+  externalTrafficPolicy: Cluster
+  ipFamilies:
+    - IPv4
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+      nodePort: 31080
+  internalTrafficPolicy: Cluster
+  type: NodePort
+  ipFamilyPolicy: SingleStack
+  sessionAffinity: None
+  selector:
+    app: vllm
+    component: vllm

@@ -1,0 +1,25 @@
+
+---
+{{- /*
+  PVC: Open WebUI — persists chat history, users, and settings.
+*/}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: open-webui-pvc
+  labels:
+    {{- include "confidential-ai-inference.labels" . | nindent 4 }}
+    app.kubernetes.io/component: open-webui
+  annotations:
+    {{- if .Values.openWebUI.keepOnUninstall }}
+    "helm.sh/resource-policy": keep
+    {{- end }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  {{- if .Values.storageClassName }}
+  storageClassName: {{ .Values.storageClassName }}
+  {{- end }}
+  resources:
+    requests:
+      storage: {{ .Values.openWebUI.storageSize }}
