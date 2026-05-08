@@ -1,6 +1,6 @@
 # Confidential Computing for AI Inference with Intel® TDX
 
-Deploy confidential containers with Intel® Trust Domain Extensions (Intel® TDX) to protect models and sensitive data from unauthorized access.
+Deploy confidential containers with Intel® Trust Domain Extensions (Intel® TDX) to protect models and sensitive data from unauthorized access, such as credit card transactions.
 
 
 ## Table of contents
